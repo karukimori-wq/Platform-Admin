@@ -5,7 +5,7 @@ Platform Admin は、Professional Studio 系の複数アプリを管理・監視
 対象アプリ:
 
 - Growth Engine
-- Numeria Studio
+- Professional Studio
 - SNS Planner
 - AI Platform Core
 
@@ -16,15 +16,26 @@ Platform Admin は、Professional Studio 系の複数アプリを管理・監視
 - Workspaces: `workspaceId`、`ownerUserId`、Stripe 接続状態、公開サイト状態、利用中アプリ
 - Logs: API、イベント、AI実行、Stripe Webhook、エラーログ
 - Contracts: contract version、準拠状態、必須ドキュメント、正式イベント名
+- Responsibilities: `app-responsibilities.md` の責務分担を表示
 
 ## ID Policy
 
 MVPでは `professionalId` を必須IDとして新設しません。
 
-- `workspaceId`: Customer / Reservation / Payment / Public Site / Sales / Session / Report / PostDraft / Activity / Usage の基本スコープ
+- `workspaceId`: `wks_...` 形式。Customer / Reservation / Payment / Public Site / Sales / Session / Report / PostDraft / Activity / Usage の基本スコープ
 - `userId`: ログインしている利用者
 - `ownerUserId`: workspace の所有者
 - `professionalId`: 将来拡張用
+
+## Responsibility Policy
+
+各アプリは `professional-platform-contracts/docs/contracts/app-responsibilities.md` の責務分担に従います。
+
+- Growth Engine: Customer、Reservation、Stripe payment state、Sales、Public Site、Service/Menu
+- Professional Studio: Session、Report、appraisal work、Report/PDF generation
+- SNS Planner: PostDraft、SNS post planning
+- AI Platform Core: Activity、Usage、Capability、AI execution logs
+- Platform Admin: Cross-app monitoring、health check、contract compliance、operational snapshots
 
 ## Payment Policy
 
