@@ -1,5 +1,12 @@
 import { AlertTriangle, Boxes, CircleDot, FileCheck2 } from "lucide-react";
-import type { AppConnection, ContractStatus, DashboardMetric, IntegrationLog, WorkspaceSummary } from "./types";
+import type {
+  AppConnection,
+  ContractStatus,
+  DashboardMetric,
+  IntegrationLog,
+  Responsibility,
+  WorkspaceSummary
+} from "./types";
 
 export const appConnections: AppConnection[] = [
   {
@@ -15,8 +22,8 @@ export const appConnections: AppConnection[] = [
     updatedAt: "2026-08-05"
   },
   {
-    id: "app_numeria_studio",
-    appName: "Numeria Studio",
+    id: "app_professional_studio",
+    appName: "Professional Studio",
     repositoryUrl: "github.com/karukimori-wq/numeria-studio",
     status: "healthy",
     contractVersion: "v0.1",
@@ -54,27 +61,27 @@ export const appConnections: AppConnection[] = [
 
 export const workspaces: WorkspaceSummary[] = [
   {
-    workspaceId: "ws_numeria_001",
+    workspaceId: "wks_numeria_001",
     ownerUserId: "user_owner_001",
     plan: "Business",
     stripeStatus: "connected",
     publicSiteStatus: "published",
-    enabledApps: ["Growth Engine", "Numeria Studio", "SNS Planner", "AI Platform Core"],
+    enabledApps: ["Growth Engine", "Professional Studio", "SNS Planner", "AI Platform Core"],
     createdAt: "2026-08-01",
     updatedAt: "2026-08-05"
   },
   {
-    workspaceId: "ws_trial_002",
+    workspaceId: "wks_trial_002",
     ownerUserId: "user_owner_002",
     plan: "Free",
     stripeStatus: "pending",
     publicSiteStatus: "draft",
-    enabledApps: ["Growth Engine", "Numeria Studio"],
+    enabledApps: ["Growth Engine", "Professional Studio"],
     createdAt: "2026-08-03",
     updatedAt: "2026-08-05"
   },
   {
-    workspaceId: "ws_pro_003",
+    workspaceId: "wks_pro_003",
     ownerUserId: "user_owner_003",
     plan: "Pro",
     stripeStatus: "error",
@@ -88,8 +95,8 @@ export const workspaces: WorkspaceSummary[] = [
 export const integrationLogs: IntegrationLog[] = [
   {
     id: "log_001",
-    workspaceId: "ws_numeria_001",
-    appName: "Numeria Studio",
+    workspaceId: "wks_numeria_001",
+    appName: "Professional Studio",
     type: "event",
     status: "success",
     message: "studio.report.generated.v1 を受信",
@@ -98,7 +105,7 @@ export const integrationLogs: IntegrationLog[] = [
   },
   {
     id: "log_002",
-    workspaceId: "ws_numeria_001",
+    workspaceId: "wks_numeria_001",
     appName: "AI Platform Core",
     type: "ai",
     status: "success",
@@ -108,7 +115,7 @@ export const integrationLogs: IntegrationLog[] = [
   },
   {
     id: "log_003",
-    workspaceId: "ws_trial_002",
+    workspaceId: "wks_trial_002",
     appName: "SNS Planner",
     type: "event",
     status: "warning",
@@ -118,7 +125,7 @@ export const integrationLogs: IntegrationLog[] = [
   },
   {
     id: "log_004",
-    workspaceId: "ws_pro_003",
+    workspaceId: "wks_pro_003",
     appName: "Growth Engine",
     type: "stripe_webhook",
     status: "failed",
@@ -139,8 +146,8 @@ export const contractStatuses: ContractStatus[] = [
     checkedAt: "2026-08-05 21:40"
   },
   {
-    id: "contract_numeria_studio",
-    appName: "Numeria Studio",
+    id: "contract_professional_studio",
+    appName: "Professional Studio",
     requiredContractVersion: "v0.1",
     currentContractVersion: "v0.1",
     status: "compliant",
@@ -175,8 +182,10 @@ export const dashboardMetrics: DashboardMetric[] = [
 ];
 
 export const contractDocuments = [
-  "docs/contracts.md",
-  "docs/integration.md",
+  "docs/contracts/shared-glossary.md",
+  "docs/contracts/platform-boundaries.md",
+  "docs/contracts/app-responsibilities.md",
+  "docs/repositories/platform-admin.md",
   "docs/contracts/api-catalog.md",
   "docs/contracts/event-catalog.md",
   "docs/contracts/identity-contract.md",
@@ -184,13 +193,37 @@ export const contractDocuments = [
 ];
 
 export const officialEvents = [
+  "growth.customer.created.v1",
+  "growth.customer.updated.v1",
+  "growth.lead.converted.v1",
+  "growth.reservation.created.v1",
+  "growth.reservation.cancelled.v1",
   "studio.session.started.v1",
   "studio.session.completed.v1",
   "studio.report.generated.v1",
+  "studio.service_reference.updated.v1",
   "sns.post_draft.created.v1",
   "sns.post_draft.updated.v1",
   "ai.activity.created.v1",
   "ai.activity.completed.v1",
   "ai.activity.failed.v1",
   "ai.usage.recorded.v1"
+];
+
+export const responsibilities: Responsibility[] = [
+  { area: "Customer management", canonicalOwner: "Growth Engine" },
+  { area: "Reservation management", canonicalOwner: "Growth Engine" },
+  { area: "Stripe payment state", canonicalOwner: "Growth Engine" },
+  { area: "Sales management", canonicalOwner: "Growth Engine" },
+  { area: "Public site", canonicalOwner: "Growth Engine" },
+  { area: "Service and menu publishing", canonicalOwner: "Growth Engine" },
+  { area: "Appraisal session", canonicalOwner: "Professional Studio" },
+  { area: "Report and PDF generation", canonicalOwner: "Professional Studio" },
+  { area: "SNS post draft", canonicalOwner: "SNS Planner" },
+  { area: "SNS post calendar", canonicalOwner: "SNS Planner" },
+  { area: "AI activity execution", canonicalOwner: "AI Platform Core" },
+  { area: "AI usage tracking", canonicalOwner: "AI Platform Core" },
+  { area: "Capability registry", canonicalOwner: "AI Platform Core" },
+  { area: "Contract definitions", canonicalOwner: "professional-platform-contracts" },
+  { area: "Cross-app monitoring", canonicalOwner: "Platform Admin" }
 ];
