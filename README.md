@@ -52,6 +52,7 @@ Platform Admin のAPIは、正本データを作らず、運営確認用のス�
 - `GET /api/logs?status=failed`: ステータス絞り込み
 - `GET /api/logs?appName=Growth%20Engine`: アプリ絞り込み
 - `GET /api/contracts`: 契約準拠状態、責務分担、正式イベント名
+- `GET /api/status`: データソース、Basic認証、環境変数設定状態
 - `GET /api/health/growth-engine`: Growth Engine health check
 - `GET /api/health/numeria-studio`: Professional Studio health check
 - `GET /api/health/sns-planner`: SNS Planner health check
