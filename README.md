@@ -53,6 +53,8 @@ Platform Admin のAPIは、正本データを作らず、運営確認用のス�
 - `GET /api/logs?appName=Growth%20Engine`: アプリ絞り込み
 - `GET /api/contracts`: 契約準拠状態、責務分担、正式イベント名
 - `GET /api/status`: データソース、Basic認証、環境変数設定状態
+- `POST /api/ingest/app-connection`: アプリ接続状態スナップショット登録
+- `POST /api/ingest/log`: 連携ログスナップショット登録
 - `GET /api/health/growth-engine`: Growth Engine health check
 - `GET /api/health/numeria-studio`: Professional Studio health check
 - `GET /api/health/sns-planner`: SNS Planner health check
@@ -74,6 +76,7 @@ MVP用のPostgreSQL/Supabase想定スキーマを `database/schema.sql` に置�
 - `docs/operations.md`: 運用モード、Basic認証、System Status、トラブルシュート
 - `docs/deployment-checklist.md`: デプロイ前チェックリスト
 - `docs/vercel-deployment.md`: Vercelデプロイ手順
+- `docs/ingestion-api.md`: 各アプリからのスナップショット登録API
 
 ## Environment Variables
 
