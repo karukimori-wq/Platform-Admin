@@ -62,3 +62,16 @@ export type DashboardMetric = {
   helper: string;
   icon: LucideIcon;
 };
+
+export type SystemStatus = {
+  dataSource: "mock" | "supabase";
+  basicAuth: "enabled" | "disabled";
+  database: {
+    supabaseUrl: "configured" | "missing";
+    serviceRoleKey: "configured" | "missing";
+  };
+  admin: {
+    username: string;
+    apiToken: "configured" | "missing";
+  };
+};
