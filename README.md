@@ -68,6 +68,19 @@ MVP用のPostgreSQL/Supabase想定スキーマを `database/schema.sql` に置�
 
 詳細は `docs/database.md` を参照してください。
 
+## Environment Variables
+
+APIは以下の環境変数がある場合、Supabase REST APIからスナップショットを読みます。
+未設定の場合はMVPモックデータにフォールバックします。
+
+- `SUPABASE_URL`
+- `SUPABASE_SERVICE_ROLE_KEY`
+- `PLATFORM_ADMIN_API_TOKEN`
+- `PLATFORM_ADMIN_USERNAME` optional, default: `admin`
+
+`SUPABASE_URL` と `SUPABASE_SERVICE_ROLE_KEY` を設定した場合、管理画面とAPIはBasic認証を必須にします。
+ユーザー名は `PLATFORM_ADMIN_USERNAME`、パスワードは `PLATFORM_ADMIN_API_TOKEN` を使います。
+
 ## Commands
 
 ```bash
