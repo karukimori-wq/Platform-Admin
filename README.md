@@ -69,6 +69,11 @@ MVP用のPostgreSQL/Supabase想定スキーマを `database/schema.sql` に置�
 
 詳細は `docs/database.md` を参照してください。
 
+## Operations
+
+- `docs/operations.md`: 運用モード、Basic認証、System Status、トラブルシュート
+- `docs/deployment-checklist.md`: デプロイ前チェックリスト
+
 ## Environment Variables
 
 APIは以下の環境変数がある場合、Supabase REST APIからスナップショットを読みます。
