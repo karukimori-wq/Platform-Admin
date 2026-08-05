@@ -73,6 +73,7 @@ MVP用のPostgreSQL/Supabase想定スキーマを `database/schema.sql` に置�
 
 - `docs/operations.md`: 運用モード、Basic認証、System Status、トラブルシュート
 - `docs/deployment-checklist.md`: デプロイ前チェックリスト
+- `docs/vercel-deployment.md`: Vercelデプロイ手順
 
 ## Environment Variables
 
