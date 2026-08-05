@@ -29,6 +29,8 @@ Platform Admin は運営者専用の監視・確認アプリです。
 - `PLATFORM_ADMIN_API_TOKEN`
 - `PLATFORM_ADMIN_USERNAME` optional, default: `admin`
 
+設定例は `.env.example` を参照してください。
+
 Basic認証:
 
 - username: `PLATFORM_ADMIN_USERNAME`
@@ -74,6 +76,23 @@ Platform Admin が正本として持たないもの:
 各データの正本は `professional-platform-contracts/docs/contracts/app-responsibilities.md` に従います。
 
 ## Troubleshooting
+
+### APIの疎通確認をしたい
+
+ローカルまたはデプロイ先に対して主要APIの疎通を確認できます。
+ローカル確認では、先に `npm run dev` または `npm run start` でPlatform Adminを起動してください。
+
+```bash
+npm run smoke
+```
+
+デプロイ先を確認する場合:
+
+```bash
+PLATFORM_ADMIN_BASE_URL=https://your-platform-admin.example.com npm run smoke
+```
+
+Supabase Snapshot ModeでBasic認証が必要な場合は、`PLATFORM_ADMIN_USERNAME` と `PLATFORM_ADMIN_API_TOKEN` を設定して実行します。
 
 ### Dashboardが空に見える
 
