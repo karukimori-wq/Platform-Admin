@@ -9,6 +9,8 @@ const endpoints = [
   "/api/logs",
   "/api/logs?status=failed",
   "/api/contracts",
+  "/api/ingest/app-connection",
+  "/api/ingest/log",
   "/api/health/growth-engine",
   "/api/health/numeria-studio",
   "/api/health/sns-planner",
@@ -25,9 +27,36 @@ let failed = false;
 
 for (const endpoint of endpoints) {
   const url = new URL(endpoint, baseUrl);
+  const options = endpoint === "/api/ingest/app-connection"
+    ? {
+        method: "POST",
+        headers: { ...headers, "content-type": "application/json" },
+        body: JSON.stringify({
+          appName: "Growth Engine",
+          repositoryUrl: "https://github.com/karukimori-wq/growth-engine",
+          status: "healthy",
+          contractVersion: "v1",
+          healthCheckUrl: "/api/health/growth-engine",
+          healthCheckStatus: "ok"
+        })
+      }
+    : endpoint === "/api/ingest/log"
+      ? {
+          method: "POST",
+          headers: { ...headers, "content-type": "application/json" },
+          body: JSON.stringify({
+            workspaceId: "wks_smoke_001",
+            appName: "Growth Engine",
+            type: "event",
+            status: "success",
+            message: "smoke test event",
+            payloadRef: "smoke"
+          })
+        }
+      : { headers };
 
   try {
-    const response = await fetch(url, { headers });
+    const response = await fetch(url, options);
     const ok = response.ok || response.status === 503;
     const marker = ok ? "OK" : "FAIL";
 
