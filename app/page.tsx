@@ -1,5 +1,14 @@
 import { Activity, Boxes, CheckCircle2, FileCheck2, Globe2, Layers3, PlugZap, ReceiptText, Search, UsersRound } from "lucide-react";
-import { appConnections, contractDocuments, contractStatuses, dashboardMetrics, integrationLogs, officialEvents, workspaces } from "@/lib/mock-data";
+import {
+  appConnections,
+  contractDocuments,
+  contractStatuses,
+  dashboardMetrics,
+  integrationLogs,
+  officialEvents,
+  responsibilities,
+  workspaces
+} from "@/lib/mock-data";
 import type { AppStatus, ContractStatusValue, LogStatus } from "@/lib/types";
 
 const appStatusLabel: Record<AppStatus, string> = { healthy: "正常", degraded: "注意", offline: "停止" };
@@ -127,6 +136,12 @@ export default function Home() {
             <div className="docPanel">
               <h4>必須ドキュメント</h4>
               {contractDocuments.map((path) => <div className="docRow" key={path}><CheckCircle2 size={16} /><span>{path}</span></div>)}
+              <h4>責務分担</h4>
+              <div className="eventList">
+                {responsibilities.map((responsibility) => (
+                  <span key={responsibility.area}>{responsibility.area}: {responsibility.canonicalOwner}</span>
+                ))}
+              </div>
               <h4>正式イベント名</h4>
               <div className="eventList">{officialEvents.map((event) => <span key={event}>{event}</span>)}</div>
             </div>
