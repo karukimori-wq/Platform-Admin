@@ -11,6 +11,7 @@ import type {
   IntegrationLog,
   LogStatus,
   Responsibility,
+  SystemStatus,
   WorkspaceSummary
 } from "@/lib/types";
 
@@ -26,6 +27,7 @@ export default function Home() {
   const [contractDocuments, setContractDocuments] = useState<string[]>([]);
   const [officialEvents, setOfficialEvents] = useState<string[]>([]);
   const [responsibilities, setResponsibilities] = useState<Responsibility[]>([]);
+  const [systemStatus, setSystemStatus] = useState<SystemStatus | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
 
@@ -37,22 +39,24 @@ export default function Home() {
         setIsLoading(true);
         setLoadError(null);
 
-        const [appsResponse, workspacesResponse, logsResponse, contractsResponse] = await Promise.all([
+        const [appsResponse, workspacesResponse, logsResponse, contractsResponse, statusResponse] = await Promise.all([
           fetch("/api/apps"),
           fetch("/api/workspaces"),
           fetch("/api/logs"),
-          fetch("/api/contracts")
+          fetch("/api/contracts"),
+          fetch("/api/status")
         ]);
 
-        if (!appsResponse.ok || !workspacesResponse.ok || !logsResponse.ok || !contractsResponse.ok) {
+        if (!appsResponse.ok || !workspacesResponse.ok || !logsResponse.ok || !contractsResponse.ok || !statusResponse.ok) {
           throw new Error("Platform Admin API snapshot could not be loaded");
         }
 
-        const [appsPayload, workspacesPayload, logsPayload, contractsPayload] = await Promise.all([
+        const [appsPayload, workspacesPayload, logsPayload, contractsPayload, statusPayload] = await Promise.all([
           appsResponse.json(),
           workspacesResponse.json(),
           logsResponse.json(),
-          contractsResponse.json()
+          contractsResponse.json(),
+          statusResponse.json()
         ]);
 
         if (!isMounted) return;
@@ -64,6 +68,7 @@ export default function Home() {
         setContractDocuments(contractsPayload.data.documents);
         setOfficialEvents(contractsPayload.data.officialEvents);
         setResponsibilities(contractsPayload.data.responsibilities);
+        setSystemStatus(statusPayload.data);
       } catch (error) {
         if (!isMounted) return;
         setLoadError(error instanceof Error ? error.message : "Unknown loading error");
@@ -149,6 +154,16 @@ export default function Home() {
               </article>
             ))}
           </div>
+          {systemStatus && (
+            <div className="systemStatus">
+              <div><span>Data Source</span><strong>{systemStatus.dataSource}</strong></div>
+              <div><span>Basic Auth</span><strong>{systemStatus.basicAuth}</strong></div>
+              <div><span>Supabase URL</span><strong>{systemStatus.database.supabaseUrl}</strong></div>
+              <div><span>Service Role</span><strong>{systemStatus.database.serviceRoleKey}</strong></div>
+              <div><span>Admin User</span><strong>{systemStatus.admin.username}</strong></div>
+              <div><span>API Token</span><strong>{systemStatus.admin.apiToken}</strong></div>
+            </div>
+          )}
         </section>
 
         <section id="apps" className="section">
