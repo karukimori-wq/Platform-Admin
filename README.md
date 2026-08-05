@@ -57,6 +57,17 @@ Platform Admin のAPIは、正本データを作らず、運営確認用のス�
 - `GET /api/health/sns-planner`: SNS Planner health check
 - `GET /api/health/ai-platform-core`: AI Platform Core health check
 
+## Database
+
+MVP用のPostgreSQL/Supabase想定スキーマを `database/schema.sql` に置いています。
+
+- Platform Admin は運営確認用スナップショットのみ保存
+- 正本データは各Canonical Ownerが保持
+- RLSは全テーブルで有効
+- MVPではブラウザ直アクセス用の公開ポリシーは未開放
+
+詳細は `docs/database.md` を参照してください。
+
 ## Commands
 
 ```bash
