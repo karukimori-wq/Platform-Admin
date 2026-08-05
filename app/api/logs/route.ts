@@ -1,17 +1,15 @@
 import { NextResponse } from "next/server";
-import { integrationLogs } from "@/lib/mock-data";
+import { assertAdminApiAccess } from "@/lib/admin-auth";
+import { getIntegrationLogs } from "@/lib/snapshot-store";
 
-export function GET(request: Request) {
+export async function GET(request: Request) {
+  const unauthorized = assertAdminApiAccess(request);
+  if (unauthorized) return unauthorized;
+
   const url = new URL(request.url);
   const status = url.searchParams.get("status");
   const appName = url.searchParams.get("appName");
-
-  const logs = integrationLogs.filter((log) => {
-    const matchesStatus = status ? log.status === status : true;
-    const matchesApp = appName ? log.appName === appName : true;
-
-    return matchesStatus && matchesApp;
-  });
+  const logs = await getIntegrationLogs({ status, appName });
 
   return NextResponse.json({
     data: logs,
