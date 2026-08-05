@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { appConnections } from "@/lib/mock-data";
+import { assertAdminApiAccess } from "@/lib/admin-auth";
+import { getAppConnections } from "@/lib/snapshot-store";
 
 type Params = {
   params: Promise<{
@@ -8,7 +9,11 @@ type Params = {
 };
 
 export async function GET(_request: Request, { params }: Params) {
+  const unauthorized = assertAdminApiAccess(_request);
+  if (unauthorized) return unauthorized;
+
   const { app } = await params;
+  const appConnections = await getAppConnections();
   const connection = appConnections.find((item) => item.healthCheckUrl.endsWith(`/${app}`));
 
   if (!connection) {
