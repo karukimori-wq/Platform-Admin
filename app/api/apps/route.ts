@@ -1,7 +1,13 @@
 import { NextResponse } from "next/server";
-import { appConnections } from "@/lib/mock-data";
+import { assertAdminApiAccess } from "@/lib/admin-auth";
+import { getAppConnections } from "@/lib/snapshot-store";
 
-export function GET() {
+export async function GET(request: Request) {
+  const unauthorized = assertAdminApiAccess(request);
+  if (unauthorized) return unauthorized;
+
+  const appConnections = await getAppConnections();
+
   return NextResponse.json({
     data: appConnections,
     count: appConnections.length
