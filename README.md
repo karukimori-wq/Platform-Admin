@@ -87,6 +87,8 @@ APIは以下の環境変数がある場合、Supabase REST APIからスナップ
 `SUPABASE_URL` と `SUPABASE_SERVICE_ROLE_KEY` を設定した場合、管理画面とAPIはBasic認証を必須にします。
 ユーザー名は `PLATFORM_ADMIN_USERNAME`、パスワードは `PLATFORM_ADMIN_API_TOKEN` を使います。
 
+設定例は `.env.example` を参照してください。
+
 ## Commands
 
 ```bash
@@ -94,4 +96,8 @@ npm install
 npm run dev
 npm run typecheck
 npm run build
+npm run smoke
 ```
+
+`npm run smoke` は `PLATFORM_ADMIN_BASE_URL` を未設定の場合 `http://127.0.0.1:3000` に対して主要APIを確認します。
+実行前に `npm run dev` または `npm run start` でPlatform Adminを起動してください。
