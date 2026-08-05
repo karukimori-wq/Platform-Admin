@@ -67,7 +67,15 @@ Supabase Snapshot Mode:
 - [ ] `npm run typecheck`
 - [ ] `npm run build`
 
-## 7. UI
+## 7. Vercel
+
+- [ ] `docs/vercel-deployment.md` を確認した
+- [ ] Build Commandが `npm run build` になっている
+- [ ] Install Commandが `npm install` になっている
+- [ ] Mock Mode / Supabase Snapshot Mode のどちらで出すか決めた
+- [ ] Supabase Snapshot Modeの場合、Vercelに必要な環境変数を設定した
+
+## 8. UI
 
 - [ ] Dashboardで管理対象4アプリが表示される
 - [ ] AppsでcontractVersionが表示される
@@ -77,7 +85,7 @@ Supabase Snapshot Mode:
 - [ ] Contractsで準拠状態、必須ドキュメント、正式イベント名が表示される
 - [ ] System StatusでdataSourceとBasic Auth状態が確認できる
 
-## 8. MVP Non-Goals
+## 9. MVP Non-Goals
 
 - [ ] 一般利用者向け画面を作っていない
 - [ ] 占い師向け業務画面を作っていない
