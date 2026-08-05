@@ -1,0 +1,88 @@
+:root {
+  --bg: #f5f7fb;
+  --panel: #ffffff;
+  --text: #172033;
+  --muted: #6b7280;
+  --line: #dfe5ef;
+  --brand: #2557d6;
+  --brand-soft: #e9efff;
+  --ok: #148a57;
+  --ok-soft: #e9f7f0;
+  --warn: #a35b00;
+  --warn-soft: #fff4df;
+  --bad: #b42318;
+  --bad-soft: #ffeceb;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; background: var(--bg); color: var(--text); font-family: Arial, "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo, sans-serif; }
+a { color: inherit; text-decoration: none; }
+
+.shell { display: grid; grid-template-columns: 260px 1fr; min-height: 100vh; }
+.sidebar { position: sticky; top: 0; height: 100vh; border-right: 1px solid var(--line); background: #fff; padding: 24px 18px; }
+.brand { display: flex; gap: 12px; align-items: center; margin-bottom: 28px; }
+.brandMark { display: grid; place-items: center; width: 42px; height: 42px; border-radius: 8px; background: var(--brand); color: #fff; font-weight: 800; }
+.brand p, .eyebrow { margin: 0; color: var(--muted); font-size: 12px; font-weight: 700; text-transform: uppercase; }
+.brand h1, .topbar h2, .section h3, .appCard h4, .workspaceCard h4, .logItem h4, .docPanel h4 { margin: 0; }
+.brand h1 { font-size: 18px; }
+.nav { display: grid; gap: 6px; }
+.nav a { display: flex; align-items: center; gap: 10px; padding: 11px 12px; border-radius: 8px; color: #344054; font-weight: 700; }
+.nav a:hover { background: var(--brand-soft); color: var(--brand); }
+
+.content { min-width: 0; padding: 24px; }
+.topbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 22px; }
+.topbar h2 { margin-top: 4px; font-size: 26px; }
+.searchBox { display: flex; align-items: center; gap: 8px; min-width: 280px; padding: 11px 14px; border: 1px solid var(--line); border-radius: 8px; background: #fff; color: var(--muted); font-size: 13px; }
+
+.section { margin-bottom: 22px; padding: 20px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); }
+.sectionHeader, .cardTop { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+.sectionHeader { margin-bottom: 16px; }
+.section h3 { margin-top: 4px; font-size: 20px; }
+.syncBadge, .planBadge { display: inline-flex; align-items: center; min-height: 28px; padding: 5px 9px; border-radius: 999px; background: var(--brand-soft); color: var(--brand); font-size: 12px; font-weight: 800; white-space: nowrap; }
+
+.metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 12px; }
+.metricCard, .appCard, .workspaceCard { border: 1px solid var(--line); border-radius: 8px; padding: 16px; background: #fff; }
+.metricCard { display: grid; gap: 6px; }
+.metricCard svg { color: var(--brand); }
+.metricCard p, .metricCard span, .appCard p, .workspaceCard p, .logItem p { margin: 0; color: var(--muted); font-size: 13px; }
+.metricCard strong { font-size: 26px; }
+.appGrid, .workspaceGrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.appMeta { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+.appMeta span { padding: 6px 8px; border-radius: 8px; background: #f4f6f9; color: #475467; font-size: 12px; font-weight: 700; }
+
+.pill { display: inline-flex; align-items: center; min-height: 26px; padding: 4px 9px; border-radius: 999px; font-size: 12px; font-weight: 800; white-space: nowrap; }
+.healthy, .success, .compliant { background: var(--ok-soft); color: var(--ok); }
+.degraded, .warning { background: var(--warn-soft); color: var(--warn); }
+.offline, .failed, .mismatch { background: var(--bad-soft); color: var(--bad); }
+
+.tableWrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; min-width: 760px; }
+th, td { border-bottom: 1px solid var(--line); padding: 12px 10px; text-align: left; font-size: 13px; vertical-align: middle; }
+th { color: var(--muted); font-size: 12px; text-transform: uppercase; }
+
+.healthRows, .logList, .docPanel, .eventList { display: grid; gap: 10px; }
+.healthRows { margin-top: 14px; }
+.healthRow { display: grid; grid-template-columns: 18px 95px 1fr; gap: 8px; align-items: center; color: #475467; font-size: 13px; }
+.healthRow svg { color: var(--brand); }
+.healthRow strong { overflow-wrap: anywhere; }
+.logItem { display: flex; align-items: center; justify-content: space-between; gap: 16px; border: 1px solid var(--line); border-radius: 8px; padding: 14px; }
+.logType { display: inline-block; margin-bottom: 5px; color: var(--brand); font-size: 12px; font-weight: 800; }
+.logRight { display: grid; justify-items: end; gap: 8px; }
+.logRight time { color: var(--muted); font-size: 12px; white-space: nowrap; }
+
+.contractLayout { display: grid; grid-template-columns: minmax(0, 1fr) 330px; gap: 14px; }
+.docPanel { align-content: start; border: 1px solid var(--line); border-radius: 8px; padding: 14px; }
+.docRow { display: flex; gap: 8px; align-items: center; color: #344054; font-size: 13px; }
+.docRow svg { color: var(--ok); flex: none; }
+.eventList span { padding: 7px 8px; border-radius: 8px; background: #f4f6f9; font-family: "SFMono-Regular", Consolas, monospace; font-size: 12px; overflow-wrap: anywhere; }
+
+@media (max-width: 980px) {
+  .shell { grid-template-columns: 1fr; }
+  .sidebar { position: static; height: auto; }
+  .nav { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+  .nav a { justify-content: center; font-size: 0; }
+  .topbar, .sectionHeader, .logItem, .contractLayout { display: grid; }
+  .metrics, .appGrid, .workspaceGrid { grid-template-columns: 1fr; }
+  .searchBox { min-width: 0; }
+}
