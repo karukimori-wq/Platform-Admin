@@ -36,6 +36,24 @@ a { color: inherit; text-decoration: none; }
 .searchBox { display: flex; align-items: center; gap: 8px; min-width: 280px; padding: 11px 14px; border: 1px solid var(--line); border-radius: 8px; background: #fff; color: var(--muted); font-size: 13px; }
 
 .section { margin-bottom: 22px; padding: 20px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); }
+.loadingBanner,
+.errorBanner {
+  margin-bottom: 16px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+}
+.loadingBanner {
+  border: 1px solid var(--line);
+  background: #fff;
+  color: var(--muted);
+}
+.errorBanner {
+  border: 1px solid var(--bad-soft);
+  background: var(--bad-soft);
+  color: var(--bad);
+}
 .sectionHeader, .cardTop { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
 .sectionHeader { margin-bottom: 16px; }
 .section h3 { margin-top: 4px; font-size: 20px; }
