@@ -4,7 +4,7 @@ export type AppStatus = "healthy" | "degraded" | "offline";
 export type ContractStatusValue = "compliant" | "warning" | "mismatch";
 export type LogStatus = "success" | "warning" | "failed";
 
-export type AppName = "Growth Engine" | "Numeria Studio" | "SNS Planner" | "AI Platform Core";
+export type AppName = "Growth Engine" | "Professional Studio" | "SNS Planner" | "AI Platform Core";
 
 export type AppConnection = {
   id: string;
@@ -49,6 +49,11 @@ export type ContractStatus = {
   status: ContractStatusValue;
   issues: string[];
   checkedAt: string;
+};
+
+export type Responsibility = {
+  area: string;
+  canonicalOwner: AppName | "professional-platform-contracts" | "Platform Admin";
 };
 
 export type DashboardMetric = {
