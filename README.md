@@ -42,6 +42,21 @@ MVPでは `professionalId` を必須IDとして新設しません。
 MVPの決済は Stripe のみ対応します。
 決済の正本は Growth Engine が持ち、Platform Admin は接続状態、決済状態、エラー、Webhook受信状態を確認します。
 
+## MVP API
+
+Platform Admin のAPIは、正本データを作らず、運営確認用のスナップショットを返します。
+
+- `GET /api/apps`: 管理対象アプリ一覧
+- `GET /api/workspaces`: workspace summary 一覧
+- `GET /api/logs`: 連携ログ一覧
+- `GET /api/logs?status=failed`: ステータス絞り込み
+- `GET /api/logs?appName=Growth%20Engine`: アプリ絞り込み
+- `GET /api/contracts`: 契約準拠状態、責務分担、正式イベント名
+- `GET /api/health/growth-engine`: Growth Engine health check
+- `GET /api/health/numeria-studio`: Professional Studio health check
+- `GET /api/health/sns-planner`: SNS Planner health check
+- `GET /api/health/ai-platform-core`: AI Platform Core health check
+
 ## Commands
 
 ```bash
