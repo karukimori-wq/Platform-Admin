@@ -102,6 +102,30 @@ async function readTable<T>(table: string, query = "select=*"): Promise<T[]> {
   return response.json();
 }
 
+async function upsertTable<TPayload>(table: string, payload: TPayload) {
+  if (!hasDatabaseConfig()) {
+    return { persisted: false };
+  }
+
+  const response = await fetch(`${supabaseUrl}/rest/v1/${table}`, {
+    method: "POST",
+    headers: {
+      apikey: serviceRoleKey as string,
+      authorization: `Bearer ${serviceRoleKey}`,
+      "content-type": "application/json",
+      prefer: "resolution=merge-duplicates,return=minimal"
+    },
+    body: JSON.stringify(payload),
+    cache: "no-store"
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to upsert ${table}: ${response.status}`);
+  }
+
+  return { persisted: true };
+}
+
 export async function getAppConnections(): Promise<AppConnection[]> {
   const rows = await readTable<DbAppConnection>("app_connections", "select=*&order=app_name.asc");
 
@@ -199,4 +223,32 @@ export async function getContractSnapshot() {
         }))
       : responsibilities
   };
+}
+
+export async function upsertAppConnectionSnapshot(app: AppConnection) {
+  return upsertTable("app_connections", {
+    id: app.id,
+    app_name: app.appName,
+    repository_url: app.repositoryUrl,
+    status: app.status,
+    contract_version: app.contractVersion,
+    last_sync_at: app.lastSyncAt || null,
+    health_check_url: app.healthCheckUrl || null,
+    health_check_status: app.healthCheckStatus || null,
+    created_at: app.createdAt,
+    updated_at: app.updatedAt
+  });
+}
+
+export async function createIntegrationLogSnapshot(log: IntegrationLog) {
+  return upsertTable("integration_logs", {
+    id: log.id,
+    workspace_id: log.workspaceId,
+    app_name: log.appName,
+    type: log.type,
+    status: log.status,
+    message: log.message,
+    payload_ref: log.payloadRef || null,
+    created_at: log.createdAt
+  });
 }
