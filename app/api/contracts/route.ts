@@ -1,13 +1,14 @@
 import { NextResponse } from "next/server";
-import { contractDocuments, contractStatuses, officialEvents, responsibilities } from "@/lib/mock-data";
+import { assertAdminApiAccess } from "@/lib/admin-auth";
+import { getContractSnapshot } from "@/lib/snapshot-store";
 
-export function GET() {
+export async function GET(request: Request) {
+  const unauthorized = assertAdminApiAccess(request);
+  if (unauthorized) return unauthorized;
+
+  const snapshot = await getContractSnapshot();
+
   return NextResponse.json({
-    data: {
-      documents: contractDocuments,
-      statuses: contractStatuses,
-      officialEvents,
-      responsibilities
-    }
+    data: snapshot
   });
 }
