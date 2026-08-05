@@ -24,6 +24,8 @@ Platform Admin MVPをデプロイする前の確認項目です。
 
 ## 3. Environment Variables
 
+- [ ] `.env.example` を確認した
+
 Mock Mode:
 
 - [ ] `SUPABASE_URL` を未設定にする、または意図的にMock Modeとして運用する
@@ -47,6 +49,7 @@ Supabase Snapshot Mode:
 
 ## 5. API Smoke Test
 
+- [ ] `npm run smoke` を実行した
 - [ ] `GET /api/status`
 - [ ] `GET /api/apps`
 - [ ] `GET /api/workspaces`
