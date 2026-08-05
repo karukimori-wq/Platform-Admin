@@ -1,21 +1,97 @@
-import { Activity, Boxes, CheckCircle2, FileCheck2, Globe2, Layers3, PlugZap, ReceiptText, Search, UsersRound } from "lucide-react";
-import {
-  appConnections,
-  contractDocuments,
-  contractStatuses,
-  dashboardMetrics,
-  integrationLogs,
-  officialEvents,
-  responsibilities,
-  workspaces
-} from "@/lib/mock-data";
-import type { AppStatus, ContractStatusValue, LogStatus } from "@/lib/types";
+"use client";
+
+import { useEffect, useMemo, useState } from "react";
+import { Activity, AlertTriangle, Boxes, CheckCircle2, CircleDot, FileCheck2, Globe2, Layers3, PlugZap, ReceiptText, Search, UsersRound } from "lucide-react";
+import type {
+  AppConnection,
+  AppStatus,
+  ContractStatus,
+  ContractStatusValue,
+  DashboardMetric,
+  IntegrationLog,
+  LogStatus,
+  Responsibility,
+  WorkspaceSummary
+} from "@/lib/types";
 
 const appStatusLabel: Record<AppStatus, string> = { healthy: "正常", degraded: "注意", offline: "停止" };
 const contractStatusLabel: Record<ContractStatusValue, string> = { compliant: "準拠", warning: "確認", mismatch: "不整合" };
 const logStatusLabel: Record<LogStatus, string> = { success: "成功", warning: "注意", failed: "失敗" };
 
 export default function Home() {
+  const [appConnections, setAppConnections] = useState<AppConnection[]>([]);
+  const [workspaces, setWorkspaces] = useState<WorkspaceSummary[]>([]);
+  const [integrationLogs, setIntegrationLogs] = useState<IntegrationLog[]>([]);
+  const [contractStatuses, setContractStatuses] = useState<ContractStatus[]>([]);
+  const [contractDocuments, setContractDocuments] = useState<string[]>([]);
+  const [officialEvents, setOfficialEvents] = useState<string[]>([]);
+  const [responsibilities, setResponsibilities] = useState<Responsibility[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadSnapshots() {
+      try {
+        setIsLoading(true);
+        setLoadError(null);
+
+        const [appsResponse, workspacesResponse, logsResponse, contractsResponse] = await Promise.all([
+          fetch("/api/apps"),
+          fetch("/api/workspaces"),
+          fetch("/api/logs"),
+          fetch("/api/contracts")
+        ]);
+
+        if (!appsResponse.ok || !workspacesResponse.ok || !logsResponse.ok || !contractsResponse.ok) {
+          throw new Error("Platform Admin API snapshot could not be loaded");
+        }
+
+        const [appsPayload, workspacesPayload, logsPayload, contractsPayload] = await Promise.all([
+          appsResponse.json(),
+          workspacesResponse.json(),
+          logsResponse.json(),
+          contractsResponse.json()
+        ]);
+
+        if (!isMounted) return;
+
+        setAppConnections(appsPayload.data);
+        setWorkspaces(workspacesPayload.data);
+        setIntegrationLogs(logsPayload.data);
+        setContractStatuses(contractsPayload.data.statuses);
+        setContractDocuments(contractsPayload.data.documents);
+        setOfficialEvents(contractsPayload.data.officialEvents);
+        setResponsibilities(contractsPayload.data.responsibilities);
+      } catch (error) {
+        if (!isMounted) return;
+        setLoadError(error instanceof Error ? error.message : "Unknown loading error");
+      } finally {
+        if (isMounted) setIsLoading(false);
+      }
+    }
+
+    loadSnapshots();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const dashboardMetrics: DashboardMetric[] = useMemo(() => {
+    const compliantContracts = contractStatuses.filter((contract) => contract.status === "compliant").length;
+    const pendingEvents = integrationLogs.filter((log) => log.status === "warning").length;
+    const errors = integrationLogs.filter((log) => log.status === "failed").length;
+
+    return [
+      { label: "管理アプリ", value: String(appConnections.length), helper: "apps monitored by API", icon: Boxes },
+      { label: "準拠契約", value: `${compliantContracts}/${contractStatuses.length}`, helper: "contract snapshot", icon: FileCheck2 },
+      { label: "未処理イベント", value: String(pendingEvents), helper: "warning logs", icon: CircleDot },
+      { label: "エラー", value: String(errors), helper: "failed logs", icon: AlertTriangle }
+    ];
+  }, [appConnections.length, contractStatuses, integrationLogs]);
+
   return (
     <main className="shell">
       <aside className="sidebar">
@@ -43,6 +119,9 @@ export default function Home() {
           </div>
           <div className="searchBox"><Search size={16} /><span>workspaceId / appName / event を検索</span></div>
         </header>
+
+        {loadError && <div className="errorBanner">{loadError}</div>}
+        {isLoading && <div className="loadingBanner">APIスナップショットを読み込み中</div>}
 
         <section id="dashboard" className="section">
           <div className="sectionHeader">
