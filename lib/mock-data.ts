@@ -10,13 +10,25 @@ import type {
 
 export const appConnections: AppConnection[] = [
   {
+    id: "app_platform_admin",
+    appName: "Platform Admin",
+    repositoryUrl: "github.com/karukimori-wq/Platform-Admin",
+    status: "healthy",
+    contractVersion: "0.1.0",
+    lastSyncAt: "2026-08-06 22:00",
+    healthCheckUrl: "https://platform-admin-preview.illusionddt.chatgpt.site/health",
+    healthCheckStatus: "200 OK",
+    createdAt: "2026-08-06",
+    updatedAt: "2026-08-06"
+  },
+  {
     id: "app_growth_engine",
     appName: "Growth Engine",
     repositoryUrl: "github.com/karukimori-wq/growth-engine",
     status: "healthy",
-    contractVersion: "v0.1",
+    contractVersion: "0.1.0",
     lastSyncAt: "2026-08-05 21:38",
-    healthCheckUrl: "/api/health/growth-engine",
+    healthCheckUrl: "https://growth-engine-api-preview.illusionddt.chatgpt.site/health",
     healthCheckStatus: "200 OK",
     createdAt: "2026-08-05",
     updatedAt: "2026-08-05"
@@ -26,9 +38,9 @@ export const appConnections: AppConnection[] = [
     appName: "Professional Studio",
     repositoryUrl: "github.com/karukimori-wq/numeria-studio",
     status: "healthy",
-    contractVersion: "v0.1",
+    contractVersion: "0.1.0",
     lastSyncAt: "2026-08-05 21:36",
-    healthCheckUrl: "/api/health/numeria-studio",
+    healthCheckUrl: "https://numeria-studio.illusionddt.chatgpt.site/health",
     healthCheckStatus: "200 OK",
     createdAt: "2026-08-05",
     updatedAt: "2026-08-05"
@@ -38,9 +50,9 @@ export const appConnections: AppConnection[] = [
     appName: "SNS Planner",
     repositoryUrl: "github.com/karukimori-wq/sns-planner",
     status: "degraded",
-    contractVersion: "v0.1",
+    contractVersion: "0.1.0",
     lastSyncAt: "2026-08-05 21:31",
-    healthCheckUrl: "/api/health/sns-planner",
+    healthCheckUrl: "https://sns-planner.illusionddt.chatgpt.site/health",
     healthCheckStatus: "event delay",
     createdAt: "2026-08-05",
     updatedAt: "2026-08-05"
@@ -50,9 +62,9 @@ export const appConnections: AppConnection[] = [
     appName: "AI Platform Core",
     repositoryUrl: "github.com/karukimori-wq/ai-platform-core",
     status: "healthy",
-    contractVersion: "v0.1",
+    contractVersion: "0.1.0",
     lastSyncAt: "2026-08-05 21:39",
-    healthCheckUrl: "/api/health/ai-platform-core",
+    healthCheckUrl: "https://ai-platform-core-preview.illusionddt.chatgpt.site/health",
     healthCheckStatus: "200 OK",
     createdAt: "2026-08-05",
     updatedAt: "2026-08-05"
@@ -66,7 +78,7 @@ export const workspaces: WorkspaceSummary[] = [
     plan: "Business",
     stripeStatus: "connected",
     publicSiteStatus: "published",
-    enabledApps: ["Growth Engine", "Professional Studio", "SNS Planner", "AI Platform Core"],
+    enabledApps: ["Platform Admin", "Growth Engine", "Professional Studio", "SNS Planner", "AI Platform Core"],
     createdAt: "2026-08-01",
     updatedAt: "2026-08-05"
   },
@@ -137,10 +149,19 @@ export const integrationLogs: IntegrationLog[] = [
 
 export const contractStatuses: ContractStatus[] = [
   {
+    id: "contract_platform_admin",
+    appName: "Platform Admin",
+    requiredContractVersion: "0.1.0",
+    currentContractVersion: "0.1.0",
+    status: "compliant",
+    issues: [],
+    checkedAt: "2026-08-06 22:00"
+  },
+  {
     id: "contract_growth_engine",
     appName: "Growth Engine",
-    requiredContractVersion: "v0.1",
-    currentContractVersion: "v0.1",
+    requiredContractVersion: "0.1.0",
+    currentContractVersion: "0.1.0",
     status: "compliant",
     issues: [],
     checkedAt: "2026-08-05 21:40"
@@ -148,8 +169,8 @@ export const contractStatuses: ContractStatus[] = [
   {
     id: "contract_professional_studio",
     appName: "Professional Studio",
-    requiredContractVersion: "v0.1",
-    currentContractVersion: "v0.1",
+    requiredContractVersion: "0.1.0",
+    currentContractVersion: "0.1.0",
     status: "compliant",
     issues: [],
     checkedAt: "2026-08-05 21:40"
@@ -157,8 +178,8 @@ export const contractStatuses: ContractStatus[] = [
   {
     id: "contract_sns_planner",
     appName: "SNS Planner",
-    requiredContractVersion: "v0.1",
-    currentContractVersion: "v0.1",
+    requiredContractVersion: "0.1.0",
+    currentContractVersion: "0.1.0",
     status: "warning",
     issues: ["未処理イベントあり"],
     checkedAt: "2026-08-05 21:40"
@@ -166,8 +187,8 @@ export const contractStatuses: ContractStatus[] = [
   {
     id: "contract_ai_platform_core",
     appName: "AI Platform Core",
-    requiredContractVersion: "v0.1",
-    currentContractVersion: "v0.1",
+    requiredContractVersion: "0.1.0",
+    currentContractVersion: "0.1.0",
     status: "compliant",
     issues: [],
     checkedAt: "2026-08-05 21:40"
@@ -175,8 +196,8 @@ export const contractStatuses: ContractStatus[] = [
 ];
 
 export const dashboardMetrics: DashboardMetric[] = [
-  { label: "管理アプリ", value: "4", helper: "4 apps monitored", icon: Boxes },
-  { label: "準拠契約", value: "3/4", helper: "SNS Planner は確認あり", icon: FileCheck2 },
+  { label: "管理アプリ", value: "5", helper: "5 apps monitored", icon: Boxes },
+  { label: "準拠契約", value: "4/5", helper: "SNS Planner は確認あり", icon: FileCheck2 },
   { label: "未処理イベント", value: "1", helper: "sns.post_draft.updated.v1", icon: CircleDot },
   { label: "エラー", value: "1", helper: "Stripe Webhook", icon: AlertTriangle }
 ];
