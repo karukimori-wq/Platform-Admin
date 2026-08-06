@@ -4,7 +4,14 @@ export type AppStatus = "healthy" | "degraded" | "offline";
 export type ContractStatusValue = "compliant" | "warning" | "mismatch";
 export type LogStatus = "success" | "warning" | "failed";
 
-export type AppName = "Growth Engine" | "Professional Studio" | "SNS Planner" | "AI Platform Core";
+export type AppName = "Platform Admin" | "Growth Engine" | "Professional Studio" | "SNS Planner" | "AI Platform Core";
+
+export type ConnectionTestAppName =
+  | "platform-admin"
+  | "growth-engine"
+  | "ai-platform-core"
+  | "sns-planner"
+  | "numeria-studio";
 
 export type AppConnection = {
   id: string;
@@ -74,4 +81,29 @@ export type SystemStatus = {
     username: string;
     apiToken: "configured" | "missing";
   };
+};
+
+export type ConnectionTestResult = {
+  appName: ConnectionTestAppName;
+  baseUrl: string;
+  healthStatus: string;
+  appVersion: string;
+  contractVersion: string;
+  contractStatus: string;
+  identityMode: string;
+  professionalIdRequired: boolean | null;
+  usesLegacyEventNames: boolean | null;
+  usesReportTerminology: boolean | null;
+  canonicalOwnershipChecked: boolean | null;
+  issues: string[];
+  lastCheckedAt: string;
+  lastError: string;
+};
+
+export type ConnectionTestLog = {
+  appName: ConnectionTestAppName;
+  endpoint: "/health" | "/version" | "/contracts/status";
+  statusCode: number | null;
+  errorMessage: string;
+  checkedAt: string;
 };
