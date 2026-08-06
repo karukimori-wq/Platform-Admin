@@ -7,6 +7,7 @@ const endpoints = [
   "/version",
   "/contracts/status",
   "/api/status",
+  "/api/connection-tests",
   "/api/apps",
   "/api/workspaces",
   "/api/logs",
