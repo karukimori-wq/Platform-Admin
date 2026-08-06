@@ -3,7 +3,7 @@ import { assertAdminApiAccess } from "@/lib/admin-auth";
 import { upsertAppConnectionSnapshot } from "@/lib/snapshot-store";
 import type { AppConnection, AppName, AppStatus } from "@/lib/types";
 
-const appNames: AppName[] = ["Growth Engine", "Professional Studio", "SNS Planner", "AI Platform Core"];
+const appNames: AppName[] = ["Platform Admin", "Growth Engine", "Professional Studio", "SNS Planner", "AI Platform Core"];
 const appStatuses: AppStatus[] = ["healthy", "degraded", "offline"];
 
 export async function POST(request: Request) {
