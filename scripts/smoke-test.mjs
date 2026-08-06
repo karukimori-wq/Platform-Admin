@@ -3,6 +3,9 @@ const username = process.env.PLATFORM_ADMIN_USERNAME ?? "admin";
 const token = process.env.PLATFORM_ADMIN_API_TOKEN ?? "";
 
 const endpoints = [
+  "/health",
+  "/version",
+  "/contracts/status",
   "/api/status",
   "/api/apps",
   "/api/workspaces",
