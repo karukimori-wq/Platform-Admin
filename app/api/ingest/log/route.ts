@@ -3,7 +3,7 @@ import { assertAdminApiAccess } from "@/lib/admin-auth";
 import { createIntegrationLogSnapshot } from "@/lib/snapshot-store";
 import type { AppName, IntegrationLog, LogStatus } from "@/lib/types";
 
-const appNames: AppName[] = ["Growth Engine", "Professional Studio", "SNS Planner", "AI Platform Core"];
+const appNames: AppName[] = ["Platform Admin", "Growth Engine", "Professional Studio", "SNS Planner", "AI Platform Core"];
 const logStatuses: LogStatus[] = ["success", "warning", "failed"];
 const logTypes: IntegrationLog["type"][] = ["api", "event", "ai", "stripe_webhook", "error"];
 
