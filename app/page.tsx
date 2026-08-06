@@ -1,10 +1,12 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Activity, AlertTriangle, Boxes, CheckCircle2, CircleDot, FileCheck2, Globe2, Layers3, PlugZap, ReceiptText, Search, UsersRound } from "lucide-react";
+import { Activity, AlertTriangle, Boxes, CheckCircle2, CircleDot, FileCheck2, Globe2, Layers3, PlugZap, ReceiptText, RefreshCw, Search, UsersRound } from "lucide-react";
 import type {
   AppConnection,
   AppStatus,
+  ConnectionTestLog,
+  ConnectionTestResult,
   ContractStatus,
   ContractStatusValue,
   DashboardMetric,
@@ -28,6 +30,9 @@ export default function Home() {
   const [officialEvents, setOfficialEvents] = useState<string[]>([]);
   const [responsibilities, setResponsibilities] = useState<Responsibility[]>([]);
   const [systemStatus, setSystemStatus] = useState<SystemStatus | null>(null);
+  const [connectionTests, setConnectionTests] = useState<ConnectionTestResult[]>([]);
+  const [connectionLogs, setConnectionLogs] = useState<ConnectionTestLog[]>([]);
+  const [isCheckingConnections, setIsCheckingConnections] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
 
@@ -39,24 +44,26 @@ export default function Home() {
         setIsLoading(true);
         setLoadError(null);
 
-        const [appsResponse, workspacesResponse, logsResponse, contractsResponse, statusResponse] = await Promise.all([
+        const [appsResponse, workspacesResponse, logsResponse, contractsResponse, statusResponse, connectionResponse] = await Promise.all([
           fetch("/api/apps"),
           fetch("/api/workspaces"),
           fetch("/api/logs"),
           fetch("/api/contracts"),
-          fetch("/api/status")
+          fetch("/api/status"),
+          fetch("/api/connection-tests")
         ]);
 
-        if (!appsResponse.ok || !workspacesResponse.ok || !logsResponse.ok || !contractsResponse.ok || !statusResponse.ok) {
+        if (!appsResponse.ok || !workspacesResponse.ok || !logsResponse.ok || !contractsResponse.ok || !statusResponse.ok || !connectionResponse.ok) {
           throw new Error("Platform Admin API snapshot could not be loaded");
         }
 
-        const [appsPayload, workspacesPayload, logsPayload, contractsPayload, statusPayload] = await Promise.all([
+        const [appsPayload, workspacesPayload, logsPayload, contractsPayload, statusPayload, connectionPayload] = await Promise.all([
           appsResponse.json(),
           workspacesResponse.json(),
           logsResponse.json(),
           contractsResponse.json(),
-          statusResponse.json()
+          statusResponse.json(),
+          connectionResponse.json()
         ]);
 
         if (!isMounted) return;
@@ -69,6 +76,8 @@ export default function Home() {
         setOfficialEvents(contractsPayload.data.officialEvents);
         setResponsibilities(contractsPayload.data.responsibilities);
         setSystemStatus(statusPayload.data);
+        setConnectionTests(connectionPayload.data);
+        setConnectionLogs(connectionPayload.logs);
       } catch (error) {
         if (!isMounted) return;
         setLoadError(error instanceof Error ? error.message : "Unknown loading error");
@@ -83,6 +92,24 @@ export default function Home() {
       isMounted = false;
     };
   }, []);
+
+  async function runConnectionTest() {
+    try {
+      setIsCheckingConnections(true);
+      setLoadError(null);
+
+      const response = await fetch("/api/connection-tests");
+      if (!response.ok) throw new Error("Connection test API could not be loaded");
+
+      const payload = await response.json();
+      setConnectionTests(payload.data);
+      setConnectionLogs(payload.logs);
+    } catch (error) {
+      setLoadError(error instanceof Error ? error.message : "Unknown connection test error");
+    } finally {
+      setIsCheckingConnections(false);
+    }
+  }
 
   const dashboardMetrics: DashboardMetric[] = useMemo(() => {
     const compliantContracts = contractStatuses.filter((contract) => contract.status === "compliant").length;
@@ -110,6 +137,7 @@ export default function Home() {
         <nav className="nav">
           <a href="#dashboard"><Layers3 size={18} />Dashboard</a>
           <a href="#apps"><Boxes size={18} />Apps</a>
+          <a href="#connection-test"><PlugZap size={18} />Connection Test</a>
           <a href="#workspaces"><UsersRound size={18} />Workspaces</a>
           <a href="#logs"><Activity size={18} />Logs</a>
           <a href="#contracts"><FileCheck2 size={18} />Contracts</a>
@@ -177,6 +205,75 @@ export default function Home() {
                 ))}
               </tbody>
             </table>
+          </div>
+        </section>
+
+        <section id="connection-test" className="section">
+          <div className="sectionHeader">
+            <div><p className="eyebrow">Connection Test</p><h3>API接続テスト</h3></div>
+            <button className="actionButton" type="button" onClick={runConnectionTest} disabled={isCheckingConnections}>
+              <RefreshCw size={16} />
+              {isCheckingConnections ? "確認中" : "再確認"}
+            </button>
+          </div>
+          <div className="tableWrap">
+            <table className="connectionTable">
+              <thead>
+                <tr>
+                  <th>appName</th>
+                  <th>baseUrl</th>
+                  <th>healthStatus</th>
+                  <th>appVersion</th>
+                  <th>contractVersion</th>
+                  <th>contractStatus</th>
+                  <th>issues</th>
+                  <th>lastCheckedAt</th>
+                  <th>lastError</th>
+                </tr>
+              </thead>
+              <tbody>
+                {connectionTests.map((result) => (
+                  <tr key={result.appName}>
+                    <td>{result.appName}</td>
+                    <td>{result.baseUrl}</td>
+                    <td><ConnectionPill ok={result.healthStatus === "200 OK"} label={result.healthStatus || "未確認"} /></td>
+                    <td>{result.appVersion || "-"}</td>
+                    <td>{result.contractVersion || "-"}</td>
+                    <td><ConnectionPill ok={result.contractStatus === "ok"} label={result.contractStatus || "unknown"} /></td>
+                    <td>{result.issues.length ? result.issues.join(", ") : "なし"}</td>
+                    <td>{result.lastCheckedAt}</td>
+                    <td>{result.lastError || "なし"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <div className="contractCheckGrid">
+            {connectionTests.map((result) => (
+              <article className="checkCard" key={`${result.appName}-checks`}>
+                <h4>{result.appName}</h4>
+                <CheckLine label="identityMode" ok={result.identityMode === "workspaceId+userId"} value={result.identityMode || "-"} />
+                <CheckLine label="professionalIdRequired" ok={result.professionalIdRequired === false} value={String(result.professionalIdRequired)} />
+                <CheckLine label="usesLegacyEventNames" ok={result.usesLegacyEventNames === false} value={String(result.usesLegacyEventNames)} />
+                <CheckLine label="usesReportTerminology" ok={result.usesReportTerminology === true} value={String(result.usesReportTerminology)} />
+              </article>
+            ))}
+          </div>
+          <div className="connectionLogs">
+            <h4>失敗ログ</h4>
+            {connectionLogs.length === 0 ? (
+              <p>失敗ログはありません。</p>
+            ) : (
+              connectionLogs.map((log) => (
+                <article className="connectionLogItem" key={`${log.appName}-${log.endpoint}-${log.checkedAt}`}>
+                  <strong>{log.appName}</strong>
+                  <span>{log.endpoint}</span>
+                  <span>{log.statusCode ?? "no status"}</span>
+                  <span>{log.errorMessage}</span>
+                  <time>{log.checkedAt}</time>
+                </article>
+              ))
+            )}
           </div>
         </section>
 
@@ -256,6 +353,19 @@ function StatusPill({ status, label }: { status: AppStatus | LogStatus; label: s
 
 function ContractPill({ status, label }: { status: ContractStatusValue; label: string }) {
   return <span className={`pill ${status}`}>{label}</span>;
+}
+
+function ConnectionPill({ ok, label }: { ok: boolean; label: string }) {
+  return <span className={`pill ${ok ? "success" : "failed"}`}>{label}</span>;
+}
+
+function CheckLine({ label, ok, value }: { label: string; ok: boolean; value: string }) {
+  return (
+    <div className="checkLine">
+      <span>{label}</span>
+      <ConnectionPill ok={ok} label={value} />
+    </div>
+  );
 }
 
 function HealthRow({ icon: Icon, label, value }: { icon: typeof ReceiptText; label: string; value: string }) {
