@@ -219,7 +219,7 @@ export const contractStatuses: ContractStatus[] = [
 export const dashboardMetrics: DashboardMetric[] = [
   { label: "管理アプリ", value: "6", helper: "Velvet included", icon: Boxes },
   { label: "準拠契約", value: "6/6", helper: "0.1.0 contracts", icon: FileCheck2 },
-  { label: "監視イベント", value: "19", helper: "Velvet + MessageDraft included", icon: CircleDot },
+  { label: "監視イベント", value: "22", helper: "Velvet + MessageDraft included", icon: CircleDot },
   { label: "エラー", value: "0", helper: "No active snapshot error", icon: AlertTriangle }
 ];
 
