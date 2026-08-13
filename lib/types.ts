@@ -4,14 +4,21 @@ export type AppStatus = "healthy" | "degraded" | "offline";
 export type ContractStatusValue = "compliant" | "warning" | "mismatch";
 export type LogStatus = "success" | "warning" | "failed";
 
-export type AppName = "Platform Admin" | "Growth Engine" | "Professional Studio" | "SNS Planner" | "AI Platform Core";
+export type AppName =
+  | "Platform Admin"
+  | "Growth Engine"
+  | "Professional Studio"
+  | "Velvet"
+  | "SNS Planner"
+  | "AI Platform Core";
 
 export type ConnectionTestAppName =
   | "platform-admin"
   | "growth-engine"
   | "ai-platform-core"
   | "sns-planner"
-  | "numeria-studio";
+  | "numeria-studio"
+  | "velvet";
 
 export type AppConnection = {
   id: string;
