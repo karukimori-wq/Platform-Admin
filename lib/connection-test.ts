@@ -19,7 +19,8 @@ export const connectionTestApps: TestApp[] = [
   { appName: "growth-engine", baseUrl: "https://growth-engine-api-preview.illusionddt.chatgpt.site" },
   { appName: "ai-platform-core", baseUrl: "https://ai-platform-core-preview.illusionddt.chatgpt.site" },
   { appName: "sns-planner", baseUrl: "https://sns-planner.illusionddt.chatgpt.site" },
-  { appName: "numeria-studio", baseUrl: "https://numeria-studio.illusionddt.chatgpt.site" }
+  { appName: "numeria-studio", baseUrl: "https://numeria-studio.illusionddt.chatgpt.site" },
+  { appName: "velvet", baseUrl: process.env.VELVET_BASE_URL ?? "https://velvet.illusionddt.chatgpt.site" }
 ];
 
 export async function runConnectionTests() {
