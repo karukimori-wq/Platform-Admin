@@ -78,15 +78,17 @@ export type DashboardMetric = {
 };
 
 export type SystemStatus = {
-  dataSource: "mock" | "supabase";
+  dataSource: "mock" | "supabase" | "d1";
   basicAuth: "enabled" | "disabled";
   database: {
     supabaseUrl: "configured" | "missing";
     serviceRoleKey: "configured" | "missing";
+    d1Binding: "target" | "inactive";
   };
   admin: {
     username: string;
     apiToken: "configured" | "missing";
+    clerk: "configured" | "missing";
   };
 };
 
