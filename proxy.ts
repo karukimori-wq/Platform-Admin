@@ -1,10 +1,37 @@
+import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
 
-export function proxy(request: NextRequest) {
-  const databaseReadsEnabled = Boolean(process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY);
-  if (!databaseReadsEnabled) return NextResponse.next();
+const isPublicRoute = createRouteMatcher([
+  "/health(.*)",
+  "/version(.*)",
+  "/contracts/status(.*)"
+]);
 
+const isServiceApiRoute = createRouteMatcher([
+  "/api/ingest(.*)",
+  "/api/persistence/roundtrip(.*)"
+]);
+
+export default clerkMiddleware(async (auth, request) => {
+  if (isPublicRoute(request)) return NextResponse.next();
+
+  // Service/API routes keep the transitional API-token fallback. Their route
+  // handlers perform the token check so machine-to-machine callers do not
+  // need an interactive Clerk session during migration.
+  if (isServiceApiRoute(request) && request.headers.get("authorization")?.startsWith("Basic ")) {
+    return NextResponse.next();
+  }
+
+  const clerkConfigured = Boolean(
+    process.env.CLERK_SECRET_KEY && process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
+  );
+
+  if (clerkConfigured) {
+    await auth.protect();
+    return NextResponse.next();
+  }
+
+  // Reversible migration fallback until Clerk production keys are configured.
   const configuredToken = process.env.PLATFORM_ADMIN_API_TOKEN;
   const configuredUsername = process.env.PLATFORM_ADMIN_USERNAME ?? "admin";
   const credentials = parseBasicAuth(request.headers.get("authorization"));
@@ -19,10 +46,13 @@ export function proxy(request: NextRequest) {
   }
 
   return NextResponse.next();
-}
+});
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|health|version|contracts/status).*)"]
+  matcher: [
+    "/((?!_next/static|_next/image|favicon.ico).*)",
+    "/(api|trpc)(.*)"
+  ]
 };
 
 function parseBasicAuth(header: string | null) {
@@ -31,9 +61,7 @@ function parseBasicAuth(header: string | null) {
   try {
     const decoded = atob(header.slice("Basic ".length));
     const separatorIndex = decoded.indexOf(":");
-
     if (separatorIndex === -1) return { username: decoded, password: "" };
-
     return {
       username: decoded.slice(0, separatorIndex),
       password: decoded.slice(separatorIndex + 1)
