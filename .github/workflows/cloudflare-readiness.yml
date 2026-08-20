@@ -26,7 +26,7 @@ jobs:
       - name: Install dependencies
         run: npm install --no-audit --no-fund
 
-      - name: Typecheck
+      - name: Typecheck Next.js application
         run: npm run typecheck
 
       - name: Next.js build
@@ -38,8 +38,11 @@ jobs:
       - name: Generate Cloudflare binding types
         run: npm run cf-typegen
 
-      - name: Verify generated Cloudflare types are type-safe
-        run: npm run typecheck
+      # Do not rerun the browser/Next tsconfig after emitting Workers runtime
+      # globals into cloudflare-env.d.ts. Workers intentionally types JSON as
+      # unknown, which changes DOM Response.json globally. The application is
+      # typechecked before generation; OpenNext/Wrangler dry-run validates the
+      # Worker bundle below.
 
       - name: Apply D1 schema locally
         run: npm run d1:schema:local
