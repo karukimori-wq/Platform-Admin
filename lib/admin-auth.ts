@@ -1,12 +1,16 @@
 import { NextResponse } from "next/server";
+import { snapshotDriverRequiresAdminAccess } from "@/lib/snapshot-driver";
 
 export function databaseReadsRequireAdminToken() {
-  return Boolean(process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY);
+  return snapshotDriverRequiresAdminAccess();
 }
 
 export function assertAdminApiAccess(request: Request) {
-  if (!databaseReadsRequireAdminToken()) return null;
+  if (!snapshotDriverRequiresAdminAccess()) return null;
 
+  // Transitional fallback. Clerk becomes the primary user-facing admin auth
+  // once a Clerk application and production keys are configured. This token
+  // remains useful for service/API access during the reversible migration.
   const configuredToken = process.env.PLATFORM_ADMIN_API_TOKEN;
   const requestToken = parseBasicAuth(request.headers.get("authorization")).password;
 
@@ -14,7 +18,7 @@ export function assertAdminApiAccess(request: Request) {
     return NextResponse.json(
       {
         error: "Unauthorized",
-        message: "Platform Admin API token is required when database reads are enabled"
+        message: "Platform Admin authorization is required for persistent snapshot access"
       },
       { status: 401 }
     );
