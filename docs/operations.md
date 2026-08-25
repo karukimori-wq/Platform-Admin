@@ -5,6 +5,15 @@ Platform Admin は運営者専用の監視・確認アプリです。
 
 ## Operating Modes
 
+### D1 Production Mode
+
+Productionでは `PLATFORM_ADMIN_PERSISTENCE_DRIVER=d1` を使い、Cloudflare D1 `platform-admin` から operational snapshot を読み書きします。
+
+必要な環境変数:
+
+- `PLATFORM_ADMIN_PERSISTENCE_DRIVER=d1`
+- `PLATFORM_ADMIN_API_TOKEN`
+
 ### Mock Mode
 
 環境変数 `SUPABASE_URL` と `SUPABASE_SERVICE_ROLE_KEY` が未設定の場合、APIは `lib/mock-data.ts` のMVPデータを返します。
@@ -18,9 +27,9 @@ Platform Admin は運営者専用の監視・確認アプリです。
 
 ### Supabase Snapshot Mode
 
-`SUPABASE_URL` と `SUPABASE_SERVICE_ROLE_KEY` を設定した場合、APIはSupabase REST APIからスナップショットを読みます。
+`SUPABASE_URL` と `SUPABASE_SERVICE_ROLE_KEY` を設定した場合、D1 が未使用または未到達の環境ではSupabase REST APIからスナップショットを読みます。
 
-このモードでは管理画面とAPI全体にBasic認証が必須になります。
+このモードは移行期間のfallbackです。Productionの正規経路はD1です。
 
 必要な環境変数:
 
@@ -31,7 +40,7 @@ Platform Admin は運営者専用の監視・確認アプリです。
 
 設定例は `.env.example` を参照してください。
 
-Basic認証:
+Basic認証互換:
 
 - username: `PLATFORM_ADMIN_USERNAME`
 - password: `PLATFORM_ADMIN_API_TOKEN`
@@ -40,10 +49,11 @@ Basic認証:
 
 DashboardのSystem Status、または `GET /api/status` で以下を確認できます。
 
-- `dataSource`: `mock` or `supabase`
+- `dataSource`: `mock`、`supabase`、または `d1`
 - `basicAuth`: `enabled` or `disabled`
 - `database.supabaseUrl`: configured/missing
 - `database.serviceRoleKey`: configured/missing
+- `database.d1`: configured/missing
 - `admin.apiToken`: configured/missing
 
 シークレット値そのものは返しません。
@@ -59,6 +69,8 @@ Platform Admin が保存・表示してよいもの:
 - contract document snapshot
 - official event snapshot
 - responsibility snapshot
+- connection test result
+- observability fields: `traceId`、`correlationId`、`requestId`、`eventName`、`errorCode`、`statusCode`
 
 Platform Admin が正本として持たないもの:
 
@@ -70,8 +82,14 @@ Platform Admin が正本として持たないもの:
 - Session
 - Report
 - PostDraft
+- MessageDraft body
+- Conversation / Message body
+- ConversationContext body
+- Professional Memory body
 - Activity execution payload
 - AI実行本体
+- API keys
+- secret prompts
 
 各データの正本は `professional-platform-contracts/docs/contracts/app-responsibilities.md` に従います。
 
@@ -97,13 +115,14 @@ Supabase Snapshot ModeでBasic認証が必要な場合は、`PLATFORM_ADMIN_USER
 ### Dashboardが空に見える
 
 1. `GET /api/status` を確認
-2. `dataSource` が `mock` か `supabase` か確認
-3. Supabase modeの場合、Basic認証のusername/passwordを確認
-4. Supabase tableにseedまたは同期データがあるか確認
+2. `dataSource` が `d1`、`mock`、`supabase` のどれか確認
+3. D1 modeの場合、Workerの `DB` binding と `PLATFORM_ADMIN_PERSISTENCE_DRIVER=d1` を確認
+4. Supabase fallback modeの場合、Basic認証のusername/passwordを確認
+5. D1またはSupabase tableにseedまたは同期データがあるか確認
 
 ### 401が返る
 
-Supabase Snapshot ModeではBasic認証が必須です。
+管理APIでは `x-platform-admin-token` が正規のAPI認証です。Basic認証は互換用途です。
 
 確認項目:
 
@@ -111,7 +130,16 @@ Supabase Snapshot ModeではBasic認証が必須です。
 - `PLATFORM_ADMIN_USERNAME` が設定値、またはdefaultの `admin` と一致している
 - ブラウザまたはAPIクライアントでBasic認証を送っている
 
-### Supabaseの値が表示されない
+### D1の値が表示されない
+
+確認項目:
+
+- `PLATFORM_ADMIN_PERSISTENCE_DRIVER=d1`
+- Workerに `DB` binding がある
+- `cloudflare/schema.sql` がremote D1へ適用済み
+- `/api/persistence/status` が `d1Reachable: true` を返す
+
+### Supabase fallbackの値が表示されない
 
 確認項目:
 
