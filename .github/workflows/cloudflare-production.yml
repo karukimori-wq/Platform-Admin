@@ -82,15 +82,16 @@ jobs:
         run: |
           RUN_ID="${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
           NOW="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          SNAPSHOT_ID="e2e-ai-platform-core-$RUN_ID"
           cat >/tmp/app-snapshot.json <<EOF
-          {"id":"e2e-ai-platform-core-$RUN_ID","appName":"ai-platform-core","repositoryUrl":"https://github.com/karukimori-wq/ai-platform-core","status":"healthy","contractVersion":"production-e2e","lastSyncAt":"$NOW","healthCheckUrl":"https://ai-platform-core.karukimori.workers.dev/health","healthCheckStatus":"200 OK","createdAt":"$NOW","updatedAt":"$NOW"}
+          {"id":"$SNAPSHOT_ID","appName":"AI Platform Core","repositoryUrl":"https://github.com/karukimori-wq/ai-platform-core","status":"healthy","contractVersion":"production-e2e","lastSyncAt":"$NOW","healthCheckUrl":"https://ai-platform-core.karukimori.workers.dev/health","healthCheckStatus":"200 OK","createdAt":"$NOW","updatedAt":"$NOW"}
           EOF
           curl --fail --silent --show-error -X POST "$PRODUCTION_URL/api/ingest/app-connection" -H 'content-type: application/json' -H "x-platform-admin-token: $PLATFORM_ADMIN_API_TOKEN" --data-binary @/tmp/app-snapshot.json | tee /tmp/ingest.json
           curl --fail --silent --show-error "$PRODUCTION_URL/api/apps" -H "x-platform-admin-token: $PLATFORM_ADMIN_API_TOKEN" | tee /tmp/apps.json
-          node - <<'NODE'
+          SNAPSHOT_ID="$SNAPSHOT_ID" node - <<'NODE'
           const fs=require('node:fs');
           const ingest=JSON.parse(fs.readFileSync('/tmp/ingest.json','utf8'));
           const apps=JSON.parse(fs.readFileSync('/tmp/apps.json','utf8'));
-          if(ingest.persisted!==true||ingest.driver!=='d1')throw new Error('Monitoring snapshot was not persisted to D1');
-          if(!Array.isArray(apps.data)||!apps.data.some(app=>app.id?.startsWith('e2e-ai-platform-core-')))throw new Error('Persisted monitoring snapshot could not be read back');
+          if(ingest.data?.persisted!==true||ingest.data?.driver!=='d1')throw new Error('Monitoring snapshot was not persisted to D1');
+          if(!Array.isArray(apps.data)||!apps.data.some(app=>app.id===process.env.SNAPSHOT_ID))throw new Error('Persisted monitoring snapshot could not be read back');
           NODE
