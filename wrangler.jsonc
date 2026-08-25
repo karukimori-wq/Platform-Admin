@@ -3,7 +3,7 @@
   "name": "platform-admin",
   "main": ".open-next/worker.js",
   "compatibility_date": "2026-08-25",
-  "compatibility_flags": ["nodejs_compat"],
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
   "assets": { "directory": ".open-next/assets", "binding": "ASSETS" },
   "vars": { "PLATFORM_ADMIN_PERSISTENCE_DRIVER": "d1" },
   "d1_databases": [
