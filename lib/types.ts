@@ -10,6 +10,7 @@ export type AppName =
   | "Professional Studio"
   | "Velvet"
   | "SNS Planner"
+  | "Communication Planner"
   | "AI Platform Core";
 
 export type ConnectionTestAppName =
@@ -17,6 +18,7 @@ export type ConnectionTestAppName =
   | "growth-engine"
   | "ai-platform-core"
   | "sns-planner"
+  | "communication-planner"
   | "numeria-studio"
   | "velvet";
 
@@ -78,11 +80,12 @@ export type DashboardMetric = {
 };
 
 export type SystemStatus = {
-  dataSource: "mock" | "supabase";
+  dataSource: "mock" | "supabase" | "d1";
   basicAuth: "enabled" | "disabled";
   database: {
     supabaseUrl: "configured" | "missing";
     serviceRoleKey: "configured" | "missing";
+    d1?: "configured" | "missing";
   };
   admin: {
     username: string;
