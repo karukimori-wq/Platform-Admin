@@ -35,7 +35,7 @@ jobs:
           fi
           test -n "$DB_ID"
           echo "D1_DATABASE_ID=$DB_ID" >> "$GITHUB_ENV"
-          node -e 'const fs=require("fs");const p="wrangler.jsonc";const s=fs.readFileSync(p,"utf8").replace("00000000-0000-0000-0000-000000000000",process.env.DB_ID??process.argv[1]);fs.writeFileSync(p,s)' "$DB_ID"
+          node -e 'const fs=require("fs");const p="wrangler.jsonc";const s=fs.readFileSync(p,"utf8").replace("00000000-0000-0000-0000-000000000000",process.argv[1]);fs.writeFileSync(p,s)' "$DB_ID"
           npx wrangler d1 info platform-admin
       - name: Apply D1 schema
         run: npx wrangler d1 execute platform-admin --remote --file=cloudflare/schema.sql --yes
@@ -61,4 +61,36 @@ jobs:
           const roundtrip=JSON.parse(fs.readFileSync('/tmp/roundtrip.json','utf8'));
           if(persistence.status!=='success'||persistence.data?.driver!=='d1'||persistence.data?.d1Reachable!==true||persistence.data?.databaseBackedPersistenceReady!==true)throw new Error('Platform Admin D1 readiness failed');
           if(roundtrip.status!=='success'||roundtrip.data?.persistenceDriver!=='d1'||roundtrip.data?.roundtripReady!==true)throw new Error('Platform Admin D1 roundtrip failed');
+          NODE
+      - name: Verify migrated app monitoring
+        run: |
+          curl --fail --silent --show-error "$PRODUCTION_URL/api/connection-tests" -H "x-platform-admin-token: $PLATFORM_ADMIN_API_TOKEN" | tee /tmp/connections.json
+          node - <<'NODE'
+          const fs=require('node:fs');
+          const payload=JSON.parse(fs.readFileSync('/tmp/connections.json','utf8'));
+          if(!Array.isArray(payload.data))throw new Error('Connection test payload missing data');
+          for(const appName of ['platform-admin','ai-platform-core','communication-planner']){
+            const app=payload.data.find(item=>item.appName===appName);
+            if(!app)throw new Error(`${appName} monitoring result missing`);
+            if(app.healthStatus!=='200 OK')throw new Error(`${appName} health monitoring failed: ${app.healthStatus}`);
+            if(app.professionalIdRequired!==false)throw new Error(`${appName} identity contract mismatch`);
+            if(app.usesLegacyEventNames===true)throw new Error(`${appName} uses legacy event names`);
+            if(app.lastError)throw new Error(`${appName} monitoring reported: ${app.lastError}`);
+          }
+          NODE
+      - name: Verify monitoring snapshot persistence
+        run: |
+          RUN_ID="${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          NOW="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          cat >/tmp/app-snapshot.json <<EOF
+          {"id":"e2e-ai-platform-core-$RUN_ID","appName":"ai-platform-core","repositoryUrl":"https://github.com/karukimori-wq/ai-platform-core","status":"healthy","contractVersion":"production-e2e","lastSyncAt":"$NOW","healthCheckUrl":"https://ai-platform-core.karukimori.workers.dev/health","healthCheckStatus":"200 OK","createdAt":"$NOW","updatedAt":"$NOW"}
+          EOF
+          curl --fail --silent --show-error -X POST "$PRODUCTION_URL/api/ingest/app-connection" -H 'content-type: application/json' -H "x-platform-admin-token: $PLATFORM_ADMIN_API_TOKEN" --data-binary @/tmp/app-snapshot.json | tee /tmp/ingest.json
+          curl --fail --silent --show-error "$PRODUCTION_URL/api/apps" -H "x-platform-admin-token: $PLATFORM_ADMIN_API_TOKEN" | tee /tmp/apps.json
+          node - <<'NODE'
+          const fs=require('node:fs');
+          const ingest=JSON.parse(fs.readFileSync('/tmp/ingest.json','utf8'));
+          const apps=JSON.parse(fs.readFileSync('/tmp/apps.json','utf8'));
+          if(ingest.persisted!==true||ingest.driver!=='d1')throw new Error('Monitoring snapshot was not persisted to D1');
+          if(!Array.isArray(apps.data)||!apps.data.some(app=>app.id?.startsWith('e2e-ai-platform-core-')))throw new Error('Persisted monitoring snapshot could not be read back');
           NODE
