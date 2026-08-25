@@ -8,5 +8,9 @@
   "vars": { "PLATFORM_ADMIN_PERSISTENCE_DRIVER": "d1" },
   "d1_databases": [
     { "binding": "DB", "database_name": "platform-admin", "database_id": "00000000-0000-0000-0000-000000000000" }
+  ],
+  "services": [
+    { "binding": "AI_PLATFORM_CORE_SERVICE", "service": "ai-platform-core" },
+    { "binding": "COMMUNICATION_PLANNER_SERVICE", "service": "communication-planner" }
   ]
 }
