@@ -11,14 +11,6 @@ export const readinessConfig = {
   issues: [] as string[]
 };
 
-export function getTimestamp() {
-  return new Date().toISOString();
-}
-
-export function getCommitSha() {
-  return process.env.VERCEL_GIT_COMMIT_SHA ?? process.env.GIT_COMMIT_SHA ?? "optional";
-}
-
-export function getAppVersion() {
-  return packageJson.version;
-}
+export function getTimestamp() { return new Date().toISOString(); }
+export function getCommitSha() { return process.env.CF_PAGES_COMMIT_SHA ?? process.env.COMMIT_SHA ?? process.env.VERCEL_GIT_COMMIT_SHA ?? process.env.GIT_COMMIT_SHA ?? "optional"; }
+export function getAppVersion() { return packageJson.version; }
