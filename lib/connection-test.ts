@@ -2,27 +2,226 @@ import { getCloudflareContext } from "@opennextjs/cloudflare";
 import type { ConnectionTestAppName, ConnectionTestLog, ConnectionTestResult } from "./types";
 
 type Endpoint = "/health" | "/version" | "/contracts/status";
-type TestApp = { appName: ConnectionTestAppName; baseUrl: string; serviceBinding?: "AI_PLATFORM_CORE_SERVICE" | "COMMUNICATION_PLANNER_SERVICE" };
-type FetchResult = { statusCode: number | null; ok: boolean; data: Record<string, unknown> | null; errorMessage: string };
+type ServiceBindingName = "AI_PLATFORM_CORE_SERVICE" | "COMMUNICATION_PLANNER_SERVICE";
+type TestApp = {
+  appName: ConnectionTestAppName;
+  baseUrl: string;
+  serviceBinding?: ServiceBindingName;
+  missingBaseUrlIssue?: string;
+};
+type FetchResult = {
+  statusCode: number | null;
+  ok: boolean;
+  skipped?: boolean;
+  data: Record<string, unknown> | null;
+  errorMessage: string;
+};
 type WorkerService = { fetch(request: Request): Promise<Response> };
-type ServiceEnv = { AI_PLATFORM_CORE_SERVICE?: WorkerService; COMMUNICATION_PLANNER_SERVICE?: WorkerService };
+type ServiceEnv = Partial<Record<ServiceBindingName, WorkerService>>;
 
-const baseUrl=(key:string,fallback:string)=>process.env[key]??fallback;
+const baseUrl = (key: string, fallback: string) => process.env[key] ?? fallback;
+const optionalBaseUrl = (key: string) => process.env[key] ?? "";
+
 export const connectionTestApps: TestApp[] = [
   { appName: "platform-admin", baseUrl: baseUrl("PLATFORM_ADMIN_BASE_URL", "https://platform-admin.karukimori.workers.dev") },
   { appName: "growth-engine", baseUrl: baseUrl("GROWTH_ENGINE_BASE_URL", "https://growth-engine-ruby-nine.vercel.app") },
-  { appName: "ai-platform-core", baseUrl: baseUrl("AI_PLATFORM_CORE_BASE_URL", "https://ai-platform-core.karukimori.workers.dev"), serviceBinding:"AI_PLATFORM_CORE_SERVICE" },
-  { appName: "communication-planner", baseUrl: baseUrl("COMMUNICATION_PLANNER_BASE_URL", "https://communication-planner.karukimori.workers.dev"), serviceBinding:"COMMUNICATION_PLANNER_SERVICE" },
+  {
+    appName: "ai-platform-core",
+    baseUrl: baseUrl("AI_PLATFORM_CORE_BASE_URL", "https://ai-platform-core.karukimori.workers.dev"),
+    serviceBinding: "AI_PLATFORM_CORE_SERVICE"
+  },
+  {
+    appName: "communication-planner",
+    baseUrl: baseUrl("COMMUNICATION_PLANNER_BASE_URL", "https://communication-planner.karukimori.workers.dev"),
+    serviceBinding: "COMMUNICATION_PLANNER_SERVICE"
+  },
   { appName: "sns-planner", baseUrl: baseUrl("SNS_PLANNER_BASE_URL", "https://sns-planner.illusionddt.chatgpt.site") },
   { appName: "numeria-studio", baseUrl: baseUrl("NUMERIA_STUDIO_BASE_URL", "https://numeria-studio.illusionddt.chatgpt.site") },
-  { appName: "velvet", baseUrl: baseUrl("VELVET_BASE_URL", "https://velvet.illusionddt.chatgpt.site") }
+  {
+    appName: "velvet",
+    baseUrl: optionalBaseUrl("VELVET_BASE_URL"),
+    missingBaseUrlIssue: "VELVET_BASE_URL_NOT_CONFIGURED: Cloudflare production endpoint is not canonical yet"
+  }
 ];
 
-export async function runConnectionTests() { const checkedAt=new Date().toISOString();const results=await Promise.all(connectionTestApps.map(app=>testApp(app,checkedAt)));return{results:results.map(result=>result.result),logs:results.flatMap(result=>result.logs),checkedAt}; }
-async function testApp(app:TestApp,checkedAt:string):Promise<{result:ConnectionTestResult;logs:ConnectionTestLog[]}>{const[health,version,contract]=await Promise.all([fetchEndpoint(app,"/health"),fetchEndpoint(app,"/version"),fetchEndpoint(app,"/contracts/status")]);const logs:ConnectionTestLog[]=[];addFailureLog(logs,app.appName,"/health",health,checkedAt);addFailureLog(logs,app.appName,"/version",version,checkedAt);addFailureLog(logs,app.appName,"/contracts/status",contract,checkedAt);const issues=asStringArray(contract.data?.issues),validationIssues=validateContract(contract.data);const lastError=[health,version,contract].filter(item=>!item.ok).map(item=>item.errorMessage).concat(validationIssues).filter(Boolean).join(" / ");return{result:{appName:app.appName,baseUrl:app.baseUrl,healthStatus:health.ok?"200 OK":formatFailure(health),appVersion:asString(version.data?.appVersion) || asString(version.data?.version),contractVersion:asString(contract.data?.contractVersion),contractStatus:asString(contract.data?.status),identityMode:asString(contract.data?.identityMode),professionalIdRequired:asBoolean(contract.data?.professionalIdRequired),usesLegacyEventNames:asBoolean(contract.data?.usesLegacyEventNames),usesReportTerminology:asBoolean(contract.data?.usesReportTerminology),canonicalOwnershipChecked:asBoolean(contract.data?.canonicalOwnershipChecked),issues:[...issues,...validationIssues],lastCheckedAt:checkedAt,lastError},logs}};
-async function fetchEndpoint(app:TestApp,endpoint:Endpoint):Promise<FetchResult>{const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),10_000);try{let response:Response;if(app.serviceBinding){const context=await getCloudflareContext({async:true}),service=(context.env as unknown as ServiceEnv)[app.serviceBinding];if(!service)throw new Error(`Service binding ${app.serviceBinding} is unavailable`);response=await service.fetch(new Request(`https://service.internal${endpoint}`,{method:"GET",signal:controller.signal}))}else{response=await fetch(`${app.baseUrl}${endpoint}`,{method:"GET",cache:"no-store",signal:controller.signal})}const text=await response.text(),raw=parseJson(text),data=unwrapEnvelope(raw);return{statusCode:response.status,ok:response.ok,data,errorMessage:response.ok?"":`HTTP ${response.status} ${endpoint}`}}catch(error){const message=error instanceof Error?error.message:String(error);return{statusCode:null,ok:false,data:null,errorMessage:`${endpoint}: ${message}`}}finally{clearTimeout(timeout)}}
-function addFailureLog(logs:ConnectionTestLog[],appName:ConnectionTestAppName,endpoint:Endpoint,result:FetchResult,checkedAt:string){if(result.ok)return;logs.push({appName,endpoint,statusCode:result.statusCode,errorMessage:result.errorMessage,checkedAt})}
-function validateContract(data:Record<string,unknown>|null){const issues:string[]=[];if(!data){issues.push("contracts/status returned no JSON payload");return issues}if(data.professionalIdRequired!==false)issues.push("professionalIdRequired is not false");if(data.usesLegacyEventNames===true)issues.push("usesLegacyEventNames is true");return issues}
-function unwrapEnvelope(value:Record<string,unknown>|null){if(!value)return null;const data=value.data;if(typeof data==="object"&&data!==null&&!Array.isArray(data))return data as Record<string,unknown>;return value}
-function parseJson(text:string){try{const parsed=JSON.parse(text);return typeof parsed==="object"&&parsed!==null?parsed as Record<string,unknown>:null}catch{return null}}
-function asString(value:unknown){return typeof value==="string"?value:""}function asBoolean(value:unknown){return typeof value==="boolean"?value:null}function asStringArray(value:unknown){return Array.isArray(value)?value.filter((item):item is string=>typeof item==="string"):[]}function formatFailure(result:FetchResult){return result.statusCode?`${result.statusCode} ERROR`:"FETCH ERROR"}
+export async function runConnectionTests() {
+  const checkedAt = new Date().toISOString();
+  const results = await Promise.all(connectionTestApps.map((app) => testApp(app, checkedAt)));
+
+  return {
+    results: results.map((result) => result.result),
+    logs: results.flatMap((result) => result.logs),
+    checkedAt
+  };
+}
+
+async function testApp(app: TestApp, checkedAt: string): Promise<{ result: ConnectionTestResult; logs: ConnectionTestLog[] }> {
+  const [health, version, contract] = await Promise.all([
+    fetchEndpoint(app, "/health"),
+    fetchEndpoint(app, "/version"),
+    fetchEndpoint(app, "/contracts/status")
+  ]);
+  const logs: ConnectionTestLog[] = [];
+
+  addFailureLog(logs, app.appName, "/health", health, checkedAt);
+  addFailureLog(logs, app.appName, "/version", version, checkedAt);
+  addFailureLog(logs, app.appName, "/contracts/status", contract, checkedAt);
+
+  const issues = asStringArray(contract.data?.issues);
+  const validationIssues = validateContract(contract.data);
+  const lastError = [health, version, contract]
+    .filter((item) => !item.ok && !item.skipped)
+    .map((item) => item.errorMessage)
+    .concat(validationIssues)
+    .filter(Boolean)
+    .join(" / ");
+
+  return {
+    result: {
+      appName: app.appName,
+      baseUrl: app.baseUrl,
+      healthStatus: health.ok ? "200 OK" : formatFailure(health),
+      appVersion: asString(version.data?.appVersion) || asString(version.data?.version),
+      contractVersion: asString(contract.data?.contractVersion),
+      contractStatus: asString(contract.data?.status),
+      identityMode: asString(contract.data?.identityMode),
+      professionalIdRequired: asBoolean(contract.data?.professionalIdRequired),
+      usesLegacyEventNames: asBoolean(contract.data?.usesLegacyEventNames),
+      usesReportTerminology: asBoolean(contract.data?.usesReportTerminology),
+      canonicalOwnershipChecked: asBoolean(contract.data?.canonicalOwnershipChecked),
+      issues: [...issues, ...validationIssues],
+      lastCheckedAt: checkedAt,
+      lastError
+    },
+    logs
+  };
+}
+
+async function fetchEndpoint(app: TestApp, endpoint: Endpoint): Promise<FetchResult> {
+  if (!app.baseUrl && !app.serviceBinding) {
+    const issue = app.missingBaseUrlIssue ?? "BASE_URL_NOT_CONFIGURED";
+
+    return {
+      statusCode: null,
+      ok: false,
+      skipped: true,
+      data: {
+        status: "skipped",
+        issues: [issue],
+        contractVersion: "0.1.0",
+        identityMode: "workspaceId+userId",
+        professionalIdRequired: false,
+        usesLegacyEventNames: false,
+        usesReportTerminology: true,
+        canonicalOwnershipChecked: true
+      },
+      errorMessage: issue
+    };
+  }
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 10_000);
+
+  try {
+    const response = await fetchAppEndpoint(app, endpoint, controller.signal);
+    const text = await response.text();
+    const raw = parseJson(text);
+    const data = unwrapEnvelope(raw);
+
+    return {
+      statusCode: response.status,
+      ok: response.ok,
+      data,
+      errorMessage: response.ok ? "" : `HTTP ${response.status} ${endpoint}`
+    };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+
+    return {
+      statusCode: null,
+      ok: false,
+      data: null,
+      errorMessage: `${endpoint}: ${message}`
+    };
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+async function fetchAppEndpoint(app: TestApp, endpoint: Endpoint, signal: AbortSignal) {
+  if (app.serviceBinding) {
+    const service = await getServiceBinding(app.serviceBinding);
+    if (service) return service.fetch(new Request(`https://service.internal${endpoint}`, { method: "GET", signal }));
+  }
+
+  return fetch(`${app.baseUrl}${endpoint}`, { method: "GET", cache: "no-store", signal });
+}
+
+async function getServiceBinding(binding: ServiceBindingName) {
+  try {
+    const context = await getCloudflareContext({ async: true });
+    return (context.env as unknown as ServiceEnv)[binding] ?? null;
+  } catch {
+    return null;
+  }
+}
+
+function addFailureLog(
+  logs: ConnectionTestLog[],
+  appName: ConnectionTestAppName,
+  endpoint: Endpoint,
+  result: FetchResult,
+  checkedAt: string
+) {
+  if (result.ok || result.skipped) return;
+  logs.push({ appName, endpoint, statusCode: result.statusCode, errorMessage: result.errorMessage, checkedAt });
+}
+
+function validateContract(data: Record<string, unknown> | null) {
+  const issues: string[] = [];
+
+  if (!data) {
+    issues.push("contracts/status returned no JSON payload");
+    return issues;
+  }
+
+  if (data.professionalIdRequired !== false) issues.push("professionalIdRequired is not false");
+  if (data.usesLegacyEventNames === true) issues.push("usesLegacyEventNames is true");
+
+  return issues;
+}
+
+function unwrapEnvelope(value: Record<string, unknown> | null) {
+  if (!value) return null;
+
+  const data = value.data;
+  if (typeof data === "object" && data !== null && !Array.isArray(data)) return data as Record<string, unknown>;
+
+  return value;
+}
+
+function parseJson(text: string) {
+  try {
+    const parsed: unknown = JSON.parse(text);
+    return typeof parsed === "object" && parsed !== null ? (parsed as Record<string, unknown>) : null;
+  } catch {
+    return null;
+  }
+}
+
+function asString(value: unknown) {
+  return typeof value === "string" ? value : "";
+}
+
+function asBoolean(value: unknown) {
+  return typeof value === "boolean" ? value : null;
+}
+
+function asStringArray(value: unknown) {
+  return Array.isArray(value) ? value.filter((item): item is string => typeof item === "string") : [];
+}
+
+function formatFailure(result: FetchResult) {
+  if (result.skipped) return "SKIPPED";
+  return result.statusCode ? `${result.statusCode} ERROR` : "FETCH ERROR";
+}
