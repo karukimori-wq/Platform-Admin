@@ -3,7 +3,15 @@ import { assertAdminApiAccess } from "@/lib/admin-auth";
 import { upsertAppConnectionSnapshot } from "@/lib/snapshot-store";
 import type { AppConnection, AppName, AppStatus } from "@/lib/types";
 
-const appNames: AppName[] = ["Platform Admin", "Growth Engine", "Professional Studio", "SNS Planner", "AI Platform Core"];
+const appNames: AppName[] = [
+  "Platform Admin",
+  "Growth Engine",
+  "Professional Studio",
+  "Velvet",
+  "SNS Planner",
+  "Communication Planner",
+  "AI Platform Core"
+];
 const appStatuses: AppStatus[] = ["healthy", "degraded", "offline"];
 
 export async function POST(request: Request) {
@@ -38,7 +46,8 @@ export async function POST(request: Request) {
   return NextResponse.json({
     data: {
       id: snapshot.id,
-      persisted: result.persisted
+      persisted: result.persisted,
+      driver: result.driver
     }
   });
 }
