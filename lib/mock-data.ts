@@ -15,11 +15,11 @@ export const appConnections: AppConnection[] = [
     repositoryUrl: "github.com/karukimori-wq/Platform-Admin",
     status: "healthy",
     contractVersion: "0.1.0",
-    lastSyncAt: "2026-08-13 13:50",
-    healthCheckUrl: "https://platform-admin-preview.illusionddt.chatgpt.site/health",
+    lastSyncAt: "2026-08-26 00:00",
+    healthCheckUrl: "https://platform-admin.karukimori.workers.dev/health",
     healthCheckStatus: "200 OK",
     createdAt: "2026-08-06",
-    updatedAt: "2026-08-13"
+    updatedAt: "2026-08-26"
   },
   {
     id: "app_growth_engine",
@@ -27,14 +27,14 @@ export const appConnections: AppConnection[] = [
     repositoryUrl: "github.com/karukimori-wq/Growth-Engine",
     status: "healthy",
     contractVersion: "0.1.0",
-    lastSyncAt: "2026-08-13 13:50",
-    healthCheckUrl: "https://growth-engine-api-preview.illusionddt.chatgpt.site/health",
+    lastSyncAt: "2026-08-26 00:00",
+    healthCheckUrl: "https://growth-engine-ruby-nine.vercel.app/health",
     healthCheckStatus: "200 OK",
     createdAt: "2026-08-05",
-    updatedAt: "2026-08-13"
+    updatedAt: "2026-08-26"
   },
   {
-    id: "app_professional_studio",
+    id: "app_numeria_studio",
     appName: "Professional Studio",
     repositoryUrl: "github.com/karukimori-wq/numeria-studio",
     status: "healthy",
@@ -43,19 +43,19 @@ export const appConnections: AppConnection[] = [
     healthCheckUrl: "https://numeria-studio.illusionddt.chatgpt.site/health",
     healthCheckStatus: "200 OK",
     createdAt: "2026-08-05",
-    updatedAt: "2026-08-13"
+    updatedAt: "2026-08-26"
   },
   {
     id: "app_velvet",
     appName: "Velvet",
     repositoryUrl: "github.com/karukimori-wq/Velvet",
-    status: "healthy",
+    status: "degraded",
     contractVersion: "0.1.0",
-    lastSyncAt: "2026-08-13 13:50",
-    healthCheckUrl: "https://velvet.illusionddt.chatgpt.site/health",
-    healthCheckStatus: "200 OK",
+    lastSyncAt: "2026-08-26 00:00",
+    healthCheckUrl: "",
+    healthCheckStatus: "skipped: VELVET_BASE_URL_NOT_CONFIGURED",
     createdAt: "2026-08-13",
-    updatedAt: "2026-08-13"
+    updatedAt: "2026-08-26"
   },
   {
     id: "app_sns_planner",
@@ -63,11 +63,23 @@ export const appConnections: AppConnection[] = [
     repositoryUrl: "github.com/karukimori-wq/sns-planner",
     status: "healthy",
     contractVersion: "0.1.0",
-    lastSyncAt: "2026-08-13 13:50",
+    lastSyncAt: "2026-08-26 00:00",
     healthCheckUrl: "https://sns-planner.illusionddt.chatgpt.site/health",
     healthCheckStatus: "200 OK",
     createdAt: "2026-08-05",
-    updatedAt: "2026-08-13"
+    updatedAt: "2026-08-26"
+  },
+  {
+    id: "app_communication_planner",
+    appName: "Communication Planner",
+    repositoryUrl: "github.com/karukimori-wq/communication-planner",
+    status: "healthy",
+    contractVersion: "0.1.0",
+    lastSyncAt: "2026-08-26 00:00",
+    healthCheckUrl: "https://communication-planner.karukimori.workers.dev/health",
+    healthCheckStatus: "200 OK",
+    createdAt: "2026-08-26",
+    updatedAt: "2026-08-26"
   },
   {
     id: "app_ai_platform_core",
@@ -75,11 +87,11 @@ export const appConnections: AppConnection[] = [
     repositoryUrl: "github.com/karukimori-wq/ai-platform-core",
     status: "healthy",
     contractVersion: "0.1.0",
-    lastSyncAt: "2026-08-13 13:50",
-    healthCheckUrl: "https://ai-platform-core-preview.illusionddt.chatgpt.site/health",
+    lastSyncAt: "2026-08-26 00:00",
+    healthCheckUrl: "https://ai-platform-core.karukimori.workers.dev/health",
     healthCheckStatus: "200 OK",
     createdAt: "2026-08-05",
-    updatedAt: "2026-08-13"
+    updatedAt: "2026-08-26"
   }
 ];
 
@@ -90,7 +102,7 @@ export const workspaces: WorkspaceSummary[] = [
     plan: "Business",
     stripeStatus: "connected",
     publicSiteStatus: "published",
-    enabledApps: ["Platform Admin", "Growth Engine", "Professional Studio", "SNS Planner", "AI Platform Core"],
+    enabledApps: ["Platform Admin", "Growth Engine", "Professional Studio", "SNS Planner", "Communication Planner", "AI Platform Core"],
     createdAt: "2026-08-01",
     updatedAt: "2026-08-13"
   },
@@ -100,7 +112,7 @@ export const workspaces: WorkspaceSummary[] = [
     plan: "Business",
     stripeStatus: "connected",
     publicSiteStatus: "published",
-    enabledApps: ["Platform Admin", "Growth Engine", "Velvet", "SNS Planner", "AI Platform Core"],
+    enabledApps: ["Platform Admin", "Growth Engine", "Velvet", "SNS Planner", "Communication Planner", "AI Platform Core"],
     createdAt: "2026-08-13",
     updatedAt: "2026-08-13"
   },
@@ -156,6 +168,16 @@ export const integrationLogs: IntegrationLog[] = [
     message: "ai.usage.recorded.v1 を記録",
     payloadRef: "payload/usage_9211",
     createdAt: "2026-08-13 13:48:44"
+  },
+  {
+    id: "log_005",
+    workspaceId: "wks_numeria_001",
+    appName: "Communication Planner",
+    type: "event",
+    status: "success",
+    message: "communication.reply_safety.checked.v1 を監視",
+    payloadRef: "payload/safety_check_ref_1001",
+    createdAt: "2026-08-26 00:00:00"
   }
 ];
 
@@ -192,9 +214,9 @@ export const contractStatuses: ContractStatus[] = [
     appName: "Velvet",
     requiredContractVersion: "0.1.0",
     currentContractVersion: "0.1.0",
-    status: "compliant",
-    issues: [],
-    checkedAt: "2026-08-13 13:50"
+    status: "warning",
+    issues: ["VELVET_BASE_URL_NOT_CONFIGURED: Cloudflare production endpoint is not canonical yet"],
+    checkedAt: "2026-08-26 00:00"
   },
   {
     id: "contract_sns_planner",
@@ -213,13 +235,22 @@ export const contractStatuses: ContractStatus[] = [
     status: "compliant",
     issues: [],
     checkedAt: "2026-08-13 13:50"
+  },
+  {
+    id: "contract_communication_planner",
+    appName: "Communication Planner",
+    requiredContractVersion: "0.1.0",
+    currentContractVersion: "0.1.0",
+    status: "compliant",
+    issues: [],
+    checkedAt: "2026-08-26 00:00"
   }
 ];
 
 export const dashboardMetrics: DashboardMetric[] = [
-  { label: "管理アプリ", value: "6", helper: "Velvet included", icon: Boxes },
-  { label: "準拠契約", value: "6/6", helper: "0.1.0 contracts", icon: FileCheck2 },
-  { label: "監視イベント", value: "22", helper: "Velvet + MessageDraft included", icon: CircleDot },
+  { label: "管理アプリ", value: "7", helper: "Communication Planner included", icon: Boxes },
+  { label: "準拠契約", value: "6/7", helper: "Velvet endpoint pending", icon: FileCheck2 },
+  { label: "監視イベント", value: "30", helper: "Communication + Velvet + MessageDraft", icon: CircleDot },
   { label: "エラー", value: "0", helper: "No active snapshot error", icon: AlertTriangle }
 ];
 
@@ -232,7 +263,9 @@ export const contractDocuments = [
   "docs/contracts/event-catalog.md",
   "docs/contracts/event-flow.md",
   "docs/contracts/identity-contract.md",
-  "docs/contracts/data-ownership.md"
+  "docs/contracts/data-ownership.md",
+  "docs/contracts/observability-contract.md",
+  "docs/repositories/communication-planner.md"
 ];
 
 export const officialEvents = [
@@ -250,6 +283,14 @@ export const officialEvents = [
   "velvet.memory.updated.v1",
   "velvet.note.created.v1",
   "velvet.next_action.created.v1",
+  "communication.message.received.v1",
+  "communication.message.sent.v1",
+  "communication.context.updated.v1",
+  "communication.promise.created.v1",
+  "communication.next_action.created.v1",
+  "communication.reply_draft.created.v1",
+  "communication.reply_safety.checked.v1",
+  "communication.person_channel.linked.v1",
   "sns.post_draft.created.v1",
   "sns.post_draft.updated.v1",
   "sns.message_draft.created.v1",
@@ -273,6 +314,13 @@ export const responsibilities: Responsibility[] = [
   { area: "Velvet professional memory", canonicalOwner: "Velvet" },
   { area: "Velvet service notes and timeline", canonicalOwner: "Velvet" },
   { area: "Velvet next action / summary reference", canonicalOwner: "Velvet" },
+  { area: "1-to-1 Unified Inbox", canonicalOwner: "Communication Planner" },
+  { area: "Communication Person projection", canonicalOwner: "Communication Planner" },
+  { area: "Channel identity linking", canonicalOwner: "Communication Planner" },
+  { area: "Conversation / Message", canonicalOwner: "Communication Planner" },
+  { area: "Conversation Context / Topic / Promise", canonicalOwner: "Communication Planner" },
+  { area: "Communication NextAction", canonicalOwner: "Communication Planner" },
+  { area: "ReplyDraft / SafetyCheck / send workflow", canonicalOwner: "Communication Planner" },
   { area: "SNS post draft", canonicalOwner: "SNS Planner" },
   { area: "SNS message draft", canonicalOwner: "SNS Planner" },
   { area: "AI activity execution", canonicalOwner: "AI Platform Core" },
