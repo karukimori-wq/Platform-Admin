@@ -14,7 +14,7 @@ export async function GET(_request: Request, { params }: Params) {
 
   const { app } = await params;
   const appConnections = await getAppConnections();
-  const connection = appConnections.find((item) => item.healthCheckUrl.endsWith(`/${app}`));
+  const connection = appConnections.find((item) => toAppSlug(item.appName) === app);
 
   if (!connection) {
     return NextResponse.json(
@@ -38,4 +38,9 @@ export async function GET(_request: Request, { params }: Params) {
     },
     { status: httpStatus }
   );
+}
+
+function toAppSlug(appName: string) {
+  if (appName === "Professional Studio") return "numeria-studio";
+  return appName.toLowerCase().replaceAll(" ", "-");
 }
