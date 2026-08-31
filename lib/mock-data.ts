@@ -27,11 +27,11 @@ export const appConnections: AppConnection[] = [
     repositoryUrl: "github.com/karukimori-wq/Growth-Engine",
     status: "healthy",
     contractVersion: "0.1.0",
-    lastSyncAt: "2026-08-26 00:00",
-    healthCheckUrl: "https://growth-engine-ruby-nine.vercel.app/health",
+    lastSyncAt: "2026-08-31 00:00",
+    healthCheckUrl: "https://growth-engine.karukimori.workers.dev/health",
     healthCheckStatus: "200 OK",
     createdAt: "2026-08-05",
-    updatedAt: "2026-08-26"
+    updatedAt: "2026-08-31"
   },
   {
     id: "app_numeria_studio",

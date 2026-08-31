@@ -64,7 +64,7 @@ Platform Admin のAPIは、正本データを作らず、運営確認用のス�
 - `GET /api/health/numeria-studio`: Numeria Studio health check
 - `GET /api/health/sns-planner`: SNS Planner health check
 - `GET /api/health/ai-platform-core`: AI Platform Core health check
-- `GET /api/connection-tests`: 監視対象アプリの `/health`、`/version`、`/contracts/status` 一括確認
+- `GET /api/connection-tests`: 監視対象アプリの `/health`、`/version`、`/contracts/status` 一括確認。Growth Engine は Cloudflare Production の `/api/persistence/status` も確認
 - `GET /api/persistence/status`: D1/Supabase/mock persistence readiness
 - `POST /api/persistence/roundtrip`: D1 write/read roundtrip
 

@@ -223,6 +223,7 @@ export default function Home() {
                   <th>appName</th>
                   <th>baseUrl</th>
                   <th>healthStatus</th>
+                  <th>persistence</th>
                   <th>appVersion</th>
                   <th>contractVersion</th>
                   <th>contractStatus</th>
@@ -237,9 +238,10 @@ export default function Home() {
                     <td>{result.appName}</td>
                     <td>{result.baseUrl}</td>
                     <td><ConnectionPill ok={result.healthStatus === "200 OK"} label={result.healthStatus || "未確認"} /></td>
+                    <td>{result.persistenceStatus ? <ConnectionPill ok={result.persistenceStatus === "success"} label={result.persistenceStatus} /> : "-"}</td>
                     <td>{result.appVersion || "-"}</td>
                     <td>{result.contractVersion || "-"}</td>
-                    <td><ConnectionPill ok={result.contractStatus === "ok"} label={result.contractStatus || "unknown"} /></td>
+                    <td><ConnectionPill ok={result.contractStatus === "success" || result.contractStatus === "ok"} label={result.contractStatus || "unknown"} /></td>
                     <td>{result.issues.length ? result.issues.join(", ") : "なし"}</td>
                     <td>{result.lastCheckedAt}</td>
                     <td>{result.lastError || "なし"}</td>

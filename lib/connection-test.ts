@@ -1,12 +1,13 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import type { ConnectionTestAppName, ConnectionTestLog, ConnectionTestResult } from "./types";
 
-type Endpoint = "/health" | "/version" | "/contracts/status";
+type Endpoint = "/health" | "/version" | "/contracts/status" | "/api/persistence/status";
 type ServiceBindingName = "AI_PLATFORM_CORE_SERVICE" | "COMMUNICATION_PLANNER_SERVICE";
 type TestApp = {
   appName: ConnectionTestAppName;
   baseUrl: string;
   serviceBinding?: ServiceBindingName;
+  readinessEndpoints?: Endpoint[];
   missingBaseUrlIssue?: string;
 };
 type FetchResult = {
@@ -24,7 +25,11 @@ const optionalBaseUrl = (key: string) => process.env[key] ?? "";
 
 export const connectionTestApps: TestApp[] = [
   { appName: "platform-admin", baseUrl: baseUrl("PLATFORM_ADMIN_BASE_URL", "https://platform-admin.karukimori.workers.dev") },
-  { appName: "growth-engine", baseUrl: baseUrl("GROWTH_ENGINE_BASE_URL", "https://growth-engine-ruby-nine.vercel.app") },
+  {
+    appName: "growth-engine",
+    baseUrl: baseUrl("GROWTH_ENGINE_BASE_URL", "https://growth-engine.karukimori.workers.dev"),
+    readinessEndpoints: ["/api/persistence/status"]
+  },
   {
     appName: "ai-platform-core",
     baseUrl: baseUrl("AI_PLATFORM_CORE_BASE_URL", "https://ai-platform-core.karukimori.workers.dev"),
@@ -61,26 +66,38 @@ async function testApp(app: TestApp, checkedAt: string): Promise<{ result: Conne
     fetchEndpoint(app, "/version"),
     fetchEndpoint(app, "/contracts/status")
   ]);
+  const readinessResults = await Promise.all((app.readinessEndpoints ?? []).map((endpoint) => fetchEndpoint(app, endpoint)));
   const logs: ConnectionTestLog[] = [];
 
   addFailureLog(logs, app.appName, "/health", health, checkedAt);
   addFailureLog(logs, app.appName, "/version", version, checkedAt);
   addFailureLog(logs, app.appName, "/contracts/status", contract, checkedAt);
+  readinessResults.forEach((result, index) => {
+    const endpoint = app.readinessEndpoints?.[index];
+    if (endpoint) addFailureLog(logs, app.appName, endpoint, result, checkedAt);
+  });
 
   const issues = asStringArray(contract.data?.issues);
   const validationIssues = validateContract(contract.data);
-  const lastError = [health, version, contract]
+  const readinessIssues = readinessResults.flatMap((result, index) => {
+    const endpoint = app.readinessEndpoints?.[index];
+    return validateReadinessEndpoint(app.appName, endpoint, result.data);
+  });
+  const lastError = [health, version, contract, ...readinessResults]
     .filter((item) => !item.ok && !item.skipped)
     .map((item) => item.errorMessage)
     .concat(validationIssues)
+    .concat(readinessIssues)
     .filter(Boolean)
     .join(" / ");
+  const persistence = readinessResults.find((_, index) => app.readinessEndpoints?.[index] === "/api/persistence/status");
 
   return {
     result: {
       appName: app.appName,
       baseUrl: app.baseUrl,
       healthStatus: health.ok ? "200 OK" : formatFailure(health),
+      persistenceStatus: persistence ? formatReadiness(persistence) : undefined,
       appVersion: asString(version.data?.appVersion) || asString(version.data?.version),
       contractVersion: asString(contract.data?.contractVersion),
       contractStatus: asString(contract.data?.status),
@@ -89,7 +106,7 @@ async function testApp(app: TestApp, checkedAt: string): Promise<{ result: Conne
       usesLegacyEventNames: asBoolean(contract.data?.usesLegacyEventNames),
       usesReportTerminology: asBoolean(contract.data?.usesReportTerminology),
       canonicalOwnershipChecked: asBoolean(contract.data?.canonicalOwnershipChecked),
-      issues: [...issues, ...validationIssues],
+      issues: [...issues, ...validationIssues, ...readinessIssues],
       lastCheckedAt: checkedAt,
       lastError
     },
@@ -191,6 +208,21 @@ function validateContract(data: Record<string, unknown> | null) {
   return issues;
 }
 
+function validateReadinessEndpoint(appName: ConnectionTestAppName, endpoint: Endpoint | undefined, data: Record<string, unknown> | null) {
+  if (appName !== "growth-engine" || endpoint !== "/api/persistence/status") return [];
+  if (!data) return ["api/persistence/status returned no JSON payload"];
+
+  const issues: string[] = [];
+  if (data.repositoryDriver !== "d1") issues.push("repositoryDriver is not d1");
+  if (data.d1Configured !== true) issues.push("d1Configured is not true");
+  if (data.d1Reachable !== true) issues.push("d1Reachable is not true");
+  if (data.databaseBackedPersistenceReady !== true) issues.push("databaseBackedPersistenceReady is not true");
+  if (Array.isArray(data.blockedUserFlows) && data.blockedUserFlows.length > 0) issues.push("blockedUserFlows is not empty");
+  if (!Array.isArray(data.blockedUserFlows)) issues.push("blockedUserFlows is not an array");
+
+  return issues;
+}
+
 function unwrapEnvelope(value: Record<string, unknown> | null) {
   if (!value) return null;
 
@@ -224,4 +256,10 @@ function asStringArray(value: unknown) {
 function formatFailure(result: FetchResult) {
   if (result.skipped) return "SKIPPED";
   return result.statusCode ? `${result.statusCode} ERROR` : "FETCH ERROR";
+}
+
+function formatReadiness(result: FetchResult) {
+  if (result.skipped) return "SKIPPED";
+  if (!result.ok) return formatFailure(result);
+  return asString(result.data?.status) || "success";
 }

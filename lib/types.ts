@@ -97,6 +97,7 @@ export type ConnectionTestResult = {
   appName: ConnectionTestAppName;
   baseUrl: string;
   healthStatus: string;
+  persistenceStatus?: string;
   appVersion: string;
   contractVersion: string;
   contractStatus: string;
@@ -112,7 +113,7 @@ export type ConnectionTestResult = {
 
 export type ConnectionTestLog = {
   appName: ConnectionTestAppName;
-  endpoint: "/health" | "/version" | "/contracts/status";
+  endpoint: "/health" | "/version" | "/contracts/status" | "/api/persistence/status";
   statusCode: number | null;
   errorMessage: string;
   checkedAt: string;

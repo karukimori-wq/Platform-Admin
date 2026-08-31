@@ -69,7 +69,7 @@ jobs:
           const fs=require('node:fs');
           const payload=JSON.parse(fs.readFileSync('/tmp/connections.json','utf8'));
           if(!Array.isArray(payload.data))throw new Error('Connection test payload missing data');
-          for(const appName of ['platform-admin','ai-platform-core','communication-planner']){
+          for(const appName of ['platform-admin','ai-platform-core','communication-planner','growth-engine']){
             const app=payload.data.find(item=>item.appName===appName);
             if(!app)throw new Error(`${appName} monitoring result missing`);
             if(app.healthStatus!=='200 OK')throw new Error(`${appName} health monitoring failed: ${app.healthStatus}`);
@@ -77,6 +77,9 @@ jobs:
             if(app.usesLegacyEventNames===true)throw new Error(`${appName} uses legacy event names`);
             if(app.lastError)throw new Error(`${appName} monitoring reported: ${app.lastError}`);
           }
+          const growth=payload.data.find(item=>item.appName==='growth-engine');
+          if(growth.baseUrl!=='https://growth-engine.karukimori.workers.dev')throw new Error(`Growth Engine canonical URL mismatch: ${growth.baseUrl}`);
+          if(growth.persistenceStatus!=='success')throw new Error(`Growth Engine D1 persistence monitoring failed: ${growth.persistenceStatus}`);
           NODE
       - name: Verify monitoring snapshot persistence
         run: |

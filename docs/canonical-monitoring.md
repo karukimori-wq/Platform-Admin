@@ -11,7 +11,7 @@ Cloudflare-migrated apps use Production endpoints as the canonical monitoring ta
 | Platform Admin | `https://platform-admin.karukimori.workers.dev` | HTTPS |
 | AI Platform Core | `https://ai-platform-core.karukimori.workers.dev` | Cloudflare Service Binding when available |
 | Communication Planner | `https://communication-planner.karukimori.workers.dev` | Cloudflare Service Binding when available |
-| Growth Engine | `https://growth-engine-ruby-nine.vercel.app` | HTTPS |
+| Growth Engine | `https://growth-engine.karukimori.workers.dev` | HTTPS |
 | SNS Planner | `https://sns-planner.illusionddt.chatgpt.site` | HTTPS |
 | Numeria Studio | `https://numeria-studio.illusionddt.chatgpt.site` | HTTPS |
 | Velvet | unset | `skipped` until `VELVET_BASE_URL` is configured |
@@ -25,6 +25,10 @@ For each app, Platform Admin checks:
 - `GET /health`
 - `GET /version`
 - `GET /contracts/status`
+
+Growth Engine also requires:
+
+- `GET /api/persistence/status`
 
 When available, app-specific readiness checks should also be shown without storing canonical business records:
 

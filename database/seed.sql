@@ -9,7 +9,7 @@ insert into app_connections (
   health_check_status
 ) values
   ('app_platform_admin', 'Platform Admin', 'github.com/karukimori-wq/Platform-Admin', 'healthy', '0.1.0', '2026-08-26 00:00:00+09', 'https://platform-admin.karukimori.workers.dev/health', '200 OK'),
-  ('app_growth_engine', 'Growth Engine', 'github.com/karukimori-wq/growth-engine', 'healthy', '0.1.0', '2026-08-26 00:00:00+09', 'https://growth-engine-ruby-nine.vercel.app/health', '200 OK'),
+  ('app_growth_engine', 'Growth Engine', 'github.com/karukimori-wq/growth-engine', 'healthy', '0.1.0', '2026-08-31 00:00:00+09', 'https://growth-engine.karukimori.workers.dev/health', '200 OK'),
   ('app_professional_studio', 'Professional Studio', 'github.com/karukimori-wq/numeria-studio', 'healthy', '0.1.0', '2026-08-26 00:00:00+09', 'https://numeria-studio.illusionddt.chatgpt.site/health', '200 OK'),
   ('app_velvet', 'Velvet', 'github.com/karukimori-wq/Velvet', 'degraded', '0.1.0', '2026-08-26 00:00:00+09', null, 'skipped: VELVET_BASE_URL_NOT_CONFIGURED'),
   ('app_sns_planner', 'SNS Planner', 'github.com/karukimori-wq/sns-planner', 'healthy', '0.1.0', '2026-08-26 00:00:00+09', 'https://sns-planner.illusionddt.chatgpt.site/health', '200 OK'),

@@ -14,7 +14,7 @@ async function probe(url: string, init?: RequestInit) {
 
 export async function GET() {
   const velvetBase = (process.env.VELVET_BASE_URL ?? "").replace(/\/$/, "");
-  const growthBase = (process.env.GROWTH_ENGINE_BASE_URL ?? "https://growth-engine-ruby-nine.vercel.app").replace(/\/$/, "");
+  const growthBase = (process.env.GROWTH_ENGINE_BASE_URL ?? "https://growth-engine.karukimori.workers.dev").replace(/\/$/, "");
   const snsBase = (process.env.SNS_PLANNER_BASE_URL ?? "https://sns-planner.illusionddt.chatgpt.site").replace(/\/$/, "");
   const checkedAt = new Date().toISOString();
 
