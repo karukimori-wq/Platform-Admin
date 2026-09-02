@@ -14,6 +14,7 @@ export async function GET() {
       usesLegacyEventNames: readinessConfig.usesLegacyEventNames,
       usesReportTerminology: readinessConfig.usesReportTerminology,
       canonicalOwnershipChecked: readinessConfig.canonicalOwnershipChecked,
+      planReleaseMonitoring: readinessConfig.planReleaseMonitoring,
       issues: readinessConfig.issues,
       timestamp: getTimestamp()
     },

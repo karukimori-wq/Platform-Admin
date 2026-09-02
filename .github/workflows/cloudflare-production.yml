@@ -52,6 +52,7 @@ jobs:
           curl --fail --silent --show-error "$PRODUCTION_URL/version" | tee /tmp/version.json
           curl --fail --silent --show-error "$PRODUCTION_URL/contracts/status" | tee /tmp/contracts.json
           curl --fail --silent --show-error "$PRODUCTION_URL/api/persistence/status" | tee /tmp/persistence.json
+          curl --fail --silent --show-error "$PRODUCTION_URL/api/plan-readiness" -H "x-platform-admin-token: $PLATFORM_ADMIN_API_TOKEN" | tee /tmp/plan-readiness.json
       - name: Verify D1 roundtrip
         run: |
           curl --fail --silent --show-error -X POST "$PRODUCTION_URL/api/persistence/roundtrip" -H "x-platform-admin-token: $PLATFORM_ADMIN_API_TOKEN" | tee /tmp/roundtrip.json

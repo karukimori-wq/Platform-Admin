@@ -20,6 +20,7 @@ Platform Admin は、Professional Studio 系の複数アプリを管理・監視
 - Contracts: contract version、準拠状態、必須ドキュメント、正式イベント名
 - Responsibilities: `app-responsibilities.md` の責務分担を表示
 - Connection Test: app health / version / contract status を一括監視
+- Free / Pro Readiness: Numeria Studio / Velvet のプラン契約、Entitlement、Usage、Webhook、Feedback Hub 導線を監視
 
 ## ID Policy
 
@@ -65,6 +66,7 @@ Platform Admin のAPIは、正本データを作らず、運営確認用のス�
 - `GET /api/health/sns-planner`: SNS Planner health check
 - `GET /api/health/ai-platform-core`: AI Platform Core health check
 - `GET /api/connection-tests`: 監視対象アプリの `/health`、`/version`、`/contracts/status` 一括確認。Growth Engine は Cloudflare Production の `/api/persistence/status` も確認
+- `GET /api/plan-readiness`: Numeria Studio / Velvet の Free / Pro リリース判定
 - `GET /api/persistence/status`: D1/Supabase/mock persistence readiness
 - `POST /api/persistence/roundtrip`: D1 write/read roundtrip
 
@@ -111,6 +113,8 @@ Productionでは D1 を優先します。Supabase関連設定は移行期間のf
 
 - `PLATFORM_ADMIN_PERSISTENCE_DRIVER=d1`
 - `PLATFORM_ADMIN_API_TOKEN`
+- `NUMERIA_STUDIO_BASE_URL` optional, default: `https://numeria-studio.illusionddt.chatgpt.site`
+- `AI_PLATFORM_CORE_BASE_URL` optional, default: `https://ai-platform-core.karukimori.workers.dev`
 - `SUPABASE_URL`
 - `SUPABASE_SERVICE_ROLE_KEY`
 - `PLATFORM_ADMIN_USERNAME` optional, default: `admin`

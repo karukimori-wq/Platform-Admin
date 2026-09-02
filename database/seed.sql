@@ -55,7 +55,8 @@ insert into contract_documents (path) values
   ('docs/contracts/identity-contract.md'),
   ('docs/contracts/data-ownership.md'),
   ('docs/contracts/observability-contract.md'),
-  ('docs/repositories/communication-planner.md')
+  ('docs/repositories/communication-planner.md'),
+  ('docs/plan-release-monitoring.md')
 on conflict (path) do update set checked_at = now();
 
 insert into official_events (event_name, publisher_app) values

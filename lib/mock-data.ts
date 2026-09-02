@@ -265,7 +265,8 @@ export const contractDocuments = [
   "docs/contracts/identity-contract.md",
   "docs/contracts/data-ownership.md",
   "docs/contracts/observability-contract.md",
-  "docs/repositories/communication-planner.md"
+  "docs/repositories/communication-planner.md",
+  "docs/plan-release-monitoring.md"
 ];
 
 export const officialEvents = [

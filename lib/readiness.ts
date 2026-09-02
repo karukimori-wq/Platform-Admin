@@ -8,6 +8,13 @@ export const readinessConfig = {
   usesLegacyEventNames: false,
   usesReportTerminology: true,
   canonicalOwnershipChecked: true,
+  planReleaseMonitoring: {
+    status: "enabled",
+    targetApps: ["numeria-studio", "velvet"],
+    plans: ["free", "pro", "business"],
+    businessPlanStatus: "preparing_not_purchasable",
+    sensitivePayloadsDisplayed: false
+  },
   issues: [] as string[]
 };
 

@@ -12,6 +12,8 @@ import type {
   DashboardMetric,
   IntegrationLog,
   LogStatus,
+  PlanReleaseReadiness,
+  ReadinessStatus,
   Responsibility,
   SystemStatus,
   WorkspaceSummary
@@ -20,6 +22,7 @@ import type {
 const appStatusLabel: Record<AppStatus, string> = { healthy: "正常", degraded: "注意", offline: "停止" };
 const contractStatusLabel: Record<ContractStatusValue, string> = { compliant: "準拠", warning: "確認", mismatch: "不整合" };
 const logStatusLabel: Record<LogStatus, string> = { success: "成功", warning: "注意", failed: "失敗" };
+const readinessLabel: Record<ReadinessStatus, string> = { success: "成功", warning: "確認", error: "失敗", skipped: "未設定" };
 
 export default function Home() {
   const [appConnections, setAppConnections] = useState<AppConnection[]>([]);
@@ -32,6 +35,7 @@ export default function Home() {
   const [systemStatus, setSystemStatus] = useState<SystemStatus | null>(null);
   const [connectionTests, setConnectionTests] = useState<ConnectionTestResult[]>([]);
   const [connectionLogs, setConnectionLogs] = useState<ConnectionTestLog[]>([]);
+  const [planReadiness, setPlanReadiness] = useState<PlanReleaseReadiness[]>([]);
   const [isCheckingConnections, setIsCheckingConnections] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -44,26 +48,28 @@ export default function Home() {
         setIsLoading(true);
         setLoadError(null);
 
-        const [appsResponse, workspacesResponse, logsResponse, contractsResponse, statusResponse, connectionResponse] = await Promise.all([
+        const [appsResponse, workspacesResponse, logsResponse, contractsResponse, statusResponse, connectionResponse, planReadinessResponse] = await Promise.all([
           fetch("/api/apps"),
           fetch("/api/workspaces"),
           fetch("/api/logs"),
           fetch("/api/contracts"),
           fetch("/api/status"),
-          fetch("/api/connection-tests")
+          fetch("/api/connection-tests"),
+          fetch("/api/plan-readiness")
         ]);
 
-        if (!appsResponse.ok || !workspacesResponse.ok || !logsResponse.ok || !contractsResponse.ok || !statusResponse.ok || !connectionResponse.ok) {
+        if (!appsResponse.ok || !workspacesResponse.ok || !logsResponse.ok || !contractsResponse.ok || !statusResponse.ok || !connectionResponse.ok || !planReadinessResponse.ok) {
           throw new Error("Platform Admin API snapshot could not be loaded");
         }
 
-        const [appsPayload, workspacesPayload, logsPayload, contractsPayload, statusPayload, connectionPayload] = await Promise.all([
+        const [appsPayload, workspacesPayload, logsPayload, contractsPayload, statusPayload, connectionPayload, planReadinessPayload] = await Promise.all([
           appsResponse.json(),
           workspacesResponse.json(),
           logsResponse.json(),
           contractsResponse.json(),
           statusResponse.json(),
-          connectionResponse.json()
+          connectionResponse.json(),
+          planReadinessResponse.json()
         ]);
 
         if (!isMounted) return;
@@ -78,6 +84,7 @@ export default function Home() {
         setSystemStatus(statusPayload.data);
         setConnectionTests(connectionPayload.data);
         setConnectionLogs(connectionPayload.logs);
+        setPlanReadiness(planReadinessPayload.data);
       } catch (error) {
         if (!isMounted) return;
         setLoadError(error instanceof Error ? error.message : "Unknown loading error");
@@ -138,6 +145,7 @@ export default function Home() {
           <a href="#dashboard"><Layers3 size={18} />Dashboard</a>
           <a href="#apps"><Boxes size={18} />Apps</a>
           <a href="#connection-test"><PlugZap size={18} />Connection Test</a>
+          <a href="#plan-readiness"><ReceiptText size={18} />Plan Readiness</a>
           <a href="#workspaces"><UsersRound size={18} />Workspaces</a>
           <a href="#logs"><Activity size={18} />Logs</a>
           <a href="#contracts"><FileCheck2 size={18} />Contracts</a>
@@ -279,6 +287,42 @@ export default function Home() {
           </div>
         </section>
 
+        <section id="plan-readiness" className="section">
+          <SectionTitle eyebrow="Free / Pro Readiness" title="リリース判定" />
+          <div className="releaseGrid">
+            {planReadiness.map((app) => (
+              <article className="releaseCard" key={app.appName}>
+                <div className="cardTop">
+                  <div>
+                    <h4>{app.appName}</h4>
+                    <p>{app.baseUrl || "Production URL 未設定"}</p>
+                  </div>
+                  <ReadinessPill status={app.productionStatus} />
+                </div>
+                <div className="releaseMeta">
+                  <span>health {app.healthStatus}</span>
+                  <span>app {app.appVersion || "-"}</span>
+                  <span>contract {app.appContractVersion || "-"}</span>
+                  <span>plan {app.planContractVersion || "-"}</span>
+                </div>
+                <div className="releaseChecks">
+                  <CheckLine label="Free設定" ok={app.freePlanConfigured === "success"} value={readinessLabel[app.freePlanConfigured]} />
+                  <CheckLine label="Pro権限" ok={app.proPlanConfigured === "success"} value={readinessLabel[app.proPlanConfigured]} />
+                  <CheckLine label="Business購入不可" ok={app.businessPlanStatus === "success"} value={readinessLabel[app.businessPlanStatus]} />
+                  <CheckLine label="Entitlement API" ok={app.entitlementApiStatus === "success"} value={readinessLabel[app.entitlementApiStatus]} />
+                  <CheckLine label="Usage集計" ok={app.usageAggregationStatus === "success"} value={readinessLabel[app.usageAggregationStatus]} />
+                  <CheckLine label="上限判定" ok={app.limitDecisionStatus === "success"} value={readinessLabel[app.limitDecisionStatus]} />
+                  <CheckLine label="プラン反映" ok={app.planChangeSyncStatus === "success"} value={readinessLabel[app.planChangeSyncStatus]} />
+                  <CheckLine label="APC利用量連携" ok={app.aiPlatformUsageLinkStatus === "success"} value={readinessLabel[app.aiPlatformUsageLinkStatus]} />
+                  <CheckLine label="Feedback Hub導線" ok={app.feedbackHubLinkStatus === "success"} value={readinessLabel[app.feedbackHubLinkStatus]} />
+                  <div className="checkLine"><span>Webhook最終成功</span><strong>{app.billingWebhookLastSuccessAt}</strong></div>
+                </div>
+                {app.issues.length > 0 && <p className="releaseIssues">{app.issues.join(" / ")}</p>}
+              </article>
+            ))}
+          </div>
+        </section>
+
         <section id="workspaces" className="section">
           <SectionTitle eyebrow="Workspaces" title="workspace と外部連携" />
           <div className="workspaceGrid">
@@ -359,6 +403,10 @@ function ContractPill({ status, label }: { status: ContractStatusValue; label: s
 
 function ConnectionPill({ ok, label }: { ok: boolean; label: string }) {
   return <span className={`pill ${ok ? "success" : "failed"}`}>{label}</span>;
+}
+
+function ReadinessPill({ status }: { status: ReadinessStatus }) {
+  return <span className={`pill ${status === "error" ? "failed" : status}`}>{readinessLabel[status]}</span>;
 }
 
 function CheckLine({ label, ok, value }: { label: string; ok: boolean; value: string }) {
