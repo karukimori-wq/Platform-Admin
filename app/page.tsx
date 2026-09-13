@@ -295,7 +295,7 @@ export default function Home() {
                 <div className="cardTop">
                   <div>
                     <h4>{app.appName}</h4>
-                    <p>{app.baseUrl || "Production URL 未設定"}</p>
+                    <p>{app.baseUrl || "Production URL 未設定"} / appId: {app.appId}</p>
                   </div>
                   <ReadinessPill status={app.productionStatus} />
                 </div>
@@ -304,6 +304,7 @@ export default function Home() {
                   <span>app {app.appVersion || "-"}</span>
                   <span>contract {app.appContractVersion || "-"}</span>
                   <span>plan {app.planContractVersion || "-"}</span>
+                  <span>scope {app.releaseScope || "-"}</span>
                 </div>
                 <div className="releaseChecks">
                   <CheckLine label="Free設定" ok={app.freePlanConfigured === "success"} value={readinessLabel[app.freePlanConfigured]} />
@@ -311,11 +312,15 @@ export default function Home() {
                   <CheckLine label="Business購入不可" ok={app.businessPlanStatus === "success"} value={readinessLabel[app.businessPlanStatus]} />
                   <CheckLine label="Entitlement API" ok={app.entitlementApiStatus === "success"} value={readinessLabel[app.entitlementApiStatus]} />
                   <CheckLine label="Usage集計" ok={app.usageAggregationStatus === "success"} value={readinessLabel[app.usageAggregationStatus]} />
+                  <CheckLine label="認証" ok={app.authReadinessStatus === "success"} value={readinessLabel[app.authReadinessStatus]} />
+                  <CheckLine label="永続化" ok={app.persistenceReadinessStatus === "success"} value={readinessLabel[app.persistenceReadinessStatus]} />
+                  <CheckLine label="D1 / DB" ok={app.databaseReadinessStatus === "success"} value={readinessLabel[app.databaseReadinessStatus]} />
                   <CheckLine label="上限判定" ok={app.limitDecisionStatus === "success"} value={readinessLabel[app.limitDecisionStatus]} />
                   <CheckLine label="プラン反映" ok={app.planChangeSyncStatus === "success"} value={readinessLabel[app.planChangeSyncStatus]} />
                   <CheckLine label="APC利用量連携" ok={app.aiPlatformUsageLinkStatus === "success"} value={readinessLabel[app.aiPlatformUsageLinkStatus]} />
                   <CheckLine label="Feedback Hub導線" ok={app.feedbackHubLinkStatus === "success"} value={readinessLabel[app.feedbackHubLinkStatus]} />
-                  <div className="checkLine"><span>Webhook最終成功</span><strong>{app.billingWebhookLastSuccessAt}</strong></div>
+                  <CheckLine label="最終デプロイ" ok={app.releaseDeployStatus === "success"} value={readinessLabel[app.releaseDeployStatus]} />
+                  <div className="checkLine"><span>主要エラー分類</span><strong>{app.primaryErrorCategories.join(", ") || "none"}</strong></div>
                 </div>
                 {app.issues.length > 0 && <p className="releaseIssues">{app.issues.join(" / ")}</p>}
               </article>

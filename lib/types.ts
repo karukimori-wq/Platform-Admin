@@ -119,7 +119,7 @@ export type ConnectionTestLog = {
   checkedAt: string;
 };
 
-export type ReleasePlanAppName = "numeria-studio" | "velvet";
+export type ReleasePlanAppName = "numeria-studio" | "velvet" | "ai-platform-core" | "feedback-hub" | "growth-engine";
 export type ReadinessStatus = "success" | "warning" | "error" | "skipped";
 
 export type PlanReadinessCheck = {
@@ -132,22 +132,28 @@ export type PlanReadinessCheck = {
 
 export type PlanReleaseReadiness = {
   appName: ReleasePlanAppName;
+  appId: string;
   baseUrl: string;
   productionStatus: ReadinessStatus;
   healthStatus: string;
   appVersion: string;
   appContractVersion: string;
   planContractVersion: string;
+  releaseScope: string;
   freePlanConfigured: ReadinessStatus;
   proPlanConfigured: ReadinessStatus;
   businessPlanStatus: ReadinessStatus;
   entitlementApiStatus: ReadinessStatus;
   usageAggregationStatus: ReadinessStatus;
-  billingWebhookLastSuccessAt: string;
+  authReadinessStatus: ReadinessStatus;
+  persistenceReadinessStatus: ReadinessStatus;
+  databaseReadinessStatus: ReadinessStatus;
+  releaseDeployStatus: ReadinessStatus;
   planChangeSyncStatus: ReadinessStatus;
   limitDecisionStatus: ReadinessStatus;
   aiPlatformUsageLinkStatus: ReadinessStatus;
   feedbackHubLinkStatus: ReadinessStatus;
+  primaryErrorCategories: string[];
   checks: PlanReadinessCheck[];
   issues: string[];
   lastCheckedAt: string;
