@@ -37,6 +37,7 @@ export default function Home() {
   const [connectionLogs, setConnectionLogs] = useState<ConnectionTestLog[]>([]);
   const [planReadiness, setPlanReadiness] = useState<PlanReleaseReadiness[]>([]);
   const [isCheckingConnections, setIsCheckingConnections] = useState(false);
+  const [isCheckingPlanReadiness, setIsCheckingPlanReadiness] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
 
@@ -118,6 +119,23 @@ export default function Home() {
     }
   }
 
+  async function runPlanReadinessCheck() {
+    try {
+      setIsCheckingPlanReadiness(true);
+      setLoadError(null);
+
+      const response = await fetch("/api/plan-readiness");
+      if (!response.ok) throw new Error("Plan readiness API could not be loaded");
+
+      const payload = await response.json();
+      setPlanReadiness(payload.data);
+    } catch (error) {
+      setLoadError(error instanceof Error ? error.message : "Unknown plan readiness error");
+    } finally {
+      setIsCheckingPlanReadiness(false);
+    }
+  }
+
   const dashboardMetrics: DashboardMetric[] = useMemo(() => {
     const compliantContracts = contractStatuses.filter((contract) => contract.status === "compliant").length;
     const pendingEvents = integrationLogs.filter((log) => log.status === "warning").length;
@@ -130,6 +148,37 @@ export default function Home() {
       { label: "エラー", value: String(errors), helper: "failed logs", icon: AlertTriangle }
     ];
   }, [appConnections.length, contractStatuses, integrationLogs]);
+
+  const planReadinessSummary = useMemo(() => {
+    const checks = planReadiness.flatMap((app) => app.checks);
+    const countByStatus = (status: ReadinessStatus) => checks.filter((check) => check.status === status).length;
+    const blockedApps = planReadiness.filter((app) => app.checks.some((check) => check.status === "error"));
+    const warningApps = planReadiness.filter((app) => app.checks.some((check) => check.status === "warning" || check.status === "skipped"));
+    const releaseReadyApps = planReadiness.filter((app) => app.checks.length > 0 && app.checks.every((check) => check.status === "success"));
+    const blockers = planReadiness.flatMap((app) =>
+      app.checks
+        .filter((check) => check.status === "error")
+        .map((check) => ({ appName: app.appName, key: check.key, label: check.label, detail: check.detail }))
+    );
+    const reviewItems = planReadiness.flatMap((app) =>
+      app.checks
+        .filter((check) => check.status === "warning" || check.status === "skipped")
+        .map((check) => ({ appName: app.appName, key: check.key, label: check.label, detail: check.detail, status: check.status }))
+    );
+
+    return {
+      totalApps: planReadiness.length,
+      releaseReadyApps: releaseReadyApps.length,
+      blockedApps: blockedApps.length,
+      warningApps: warningApps.length,
+      successChecks: countByStatus("success"),
+      warningChecks: countByStatus("warning"),
+      errorChecks: countByStatus("error"),
+      skippedChecks: countByStatus("skipped"),
+      blockers,
+      reviewItems
+    };
+  }, [planReadiness]);
 
   return (
     <main className="shell">
@@ -288,7 +337,71 @@ export default function Home() {
         </section>
 
         <section id="plan-readiness" className="section">
-          <SectionTitle eyebrow="Free / Pro Readiness" title="リリース判定" />
+          <div className="sectionHeader">
+            <div><p className="eyebrow">Free / Pro Readiness</p><h3>リリース判定</h3></div>
+            <button className="actionButton" type="button" onClick={runPlanReadinessCheck} disabled={isCheckingPlanReadiness}>
+              <RefreshCw size={16} />
+              {isCheckingPlanReadiness ? "確認中" : "再確認"}
+            </button>
+          </div>
+          <div className="releaseSummaryGrid">
+            <article className="releaseSummaryCard">
+              <span>Release ready</span>
+              <strong>{planReadinessSummary.releaseReadyApps}/{planReadinessSummary.totalApps}</strong>
+              <p>全チェック成功のアプリ</p>
+            </article>
+            <article className="releaseSummaryCard warning">
+              <span>Review needed</span>
+              <strong>{planReadinessSummary.warningApps}</strong>
+              <p>warning / skipped を含むアプリ</p>
+            </article>
+            <article className="releaseSummaryCard failed">
+              <span>Blocked</span>
+              <strong>{planReadinessSummary.blockedApps}</strong>
+              <p>error を含むアプリ</p>
+            </article>
+            <article className="releaseSummaryCard">
+              <span>Checks</span>
+              <strong>{planReadinessSummary.successChecks}/{planReadinessSummary.successChecks + planReadinessSummary.warningChecks + planReadinessSummary.errorChecks + planReadinessSummary.skippedChecks}</strong>
+              <p>成功 / 全チェック</p>
+            </article>
+          </div>
+          <div className="readinessNotice">
+            <strong>監視境界</strong>
+            <span>Platform Admin は operational metadata のみ表示します。決済情報、APIキー、顧客の会話全文、鑑定本文、メッセージ本文、secret prompt は表示・保存対象にしません。</span>
+          </div>
+          {(planReadinessSummary.blockers.length > 0 || planReadinessSummary.reviewItems.length > 0) && (
+            <div className="releaseTriageGrid">
+              <article className="triagePanel">
+                <h4>ブロッカー</h4>
+                {planReadinessSummary.blockers.length === 0 ? (
+                  <p>リリースを止める error はありません。</p>
+                ) : (
+                  planReadinessSummary.blockers.map((item) => (
+                    <div className="triageItem failed" key={`${item.appName}-${item.key}`}>
+                      <strong>{item.appName}</strong>
+                      <span>{item.label}</span>
+                      <small>{item.detail}</small>
+                    </div>
+                  ))
+                )}
+              </article>
+              <article className="triagePanel">
+                <h4>確認待ち</h4>
+                {planReadinessSummary.reviewItems.length === 0 ? (
+                  <p>warning / skipped はありません。</p>
+                ) : (
+                  planReadinessSummary.reviewItems.slice(0, 10).map((item) => (
+                    <div className={`triageItem ${item.status}`} key={`${item.appName}-${item.key}`}>
+                      <strong>{item.appName}</strong>
+                      <span>{item.label}</span>
+                      <small>{item.detail}</small>
+                    </div>
+                  ))
+                )}
+              </article>
+            </div>
+          )}
           <div className="releaseGrid">
             {planReadiness.map((app) => (
               <article className="releaseCard" key={app.appName}>
@@ -322,6 +435,18 @@ export default function Home() {
                   <CheckLine label="最終デプロイ" ok={app.releaseDeployStatus === "success"} value={readinessLabel[app.releaseDeployStatus]} />
                   <div className="checkLine"><span>主要エラー分類</span><strong>{app.primaryErrorCategories.join(", ") || "none"}</strong></div>
                 </div>
+                <details className="releaseDetails">
+                  <summary>全チェック詳細</summary>
+                  <div className="releaseDetailList">
+                    {app.checks.map((check) => (
+                      <div className="releaseDetailItem" key={`${app.appName}-${check.key}`}>
+                        <span>{check.label}</span>
+                        <ReadinessPill status={check.status} />
+                        <small>{check.detail}</small>
+                      </div>
+                    ))}
+                  </div>
+                </details>
                 {app.issues.length > 0 && <p className="releaseIssues">{app.issues.join(" / ")}</p>}
               </article>
             ))}
