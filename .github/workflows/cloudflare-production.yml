@@ -52,7 +52,15 @@ jobs:
           curl --fail --silent --show-error "$PRODUCTION_URL/version" | tee /tmp/version.json
           curl --fail --silent --show-error "$PRODUCTION_URL/contracts/status" | tee /tmp/contracts.json
           curl --fail --silent --show-error "$PRODUCTION_URL/api/persistence/status" | tee /tmp/persistence.json
-          curl --fail --silent --show-error "$PRODUCTION_URL/api/plan-readiness" -H "x-platform-admin-token: $PLATFORM_ADMIN_API_TOKEN" | tee /tmp/plan-readiness.json
+          for attempt in 1 2 3 4 5 6; do
+            status_code=$(curl --silent --show-error --output /tmp/plan-readiness.json --write-out "%{http_code}" "$PRODUCTION_URL/api/plan-readiness" -H "x-platform-admin-token: $PLATFORM_ADMIN_API_TOKEN")
+            if [ "$status_code" = "200" ] && [ -s /tmp/plan-readiness.json ]; then
+              cat /tmp/plan-readiness.json
+              break
+            fi
+            echo "plan-readiness not ready yet: HTTP $status_code attempt $attempt"
+            sleep 10
+          done
           node scripts/verify-plan-readiness.mjs /tmp/plan-readiness.json
       - name: Verify D1 roundtrip
         run: |

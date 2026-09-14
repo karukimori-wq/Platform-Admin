@@ -2,8 +2,19 @@ import fs from "node:fs";
 
 const filePath = process.argv[2];
 if (!filePath) throw new Error("Usage: node scripts/verify-plan-readiness.mjs <payload.json>");
+if (!fs.existsSync(filePath)) throw new Error(`Plan readiness payload file is missing: ${filePath}`);
 
-const payload = JSON.parse(fs.readFileSync(filePath, "utf8"));
+const text = fs.readFileSync(filePath, "utf8").trim();
+if (!text) throw new Error(`Plan readiness payload is empty: ${filePath}`);
+
+let payload;
+try {
+  payload = JSON.parse(text);
+} catch (error) {
+  const preview = text.slice(0, 160);
+  throw new Error(`Plan readiness payload is not valid JSON: ${preview}`, { cause: error });
+}
+
 const apps = payload.data;
 if (!Array.isArray(apps)) throw new Error("Plan readiness payload missing data array");
 
