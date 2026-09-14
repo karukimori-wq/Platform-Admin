@@ -167,11 +167,130 @@ td { overflow-wrap: anywhere; }
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
 }
+.releaseSummaryGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.releaseSummaryCard {
+  display: grid;
+  gap: 5px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 13px;
+  background: #fff;
+}
+.releaseSummaryCard > span {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+.releaseSummaryCard strong {
+  color: var(--ok);
+  font-size: 24px;
+}
+.releaseSummaryCard.warning strong {
+  color: var(--warn);
+}
+.releaseSummaryCard.failed strong {
+  color: var(--bad);
+}
+.releaseSummaryCard p,
+.readinessNotice span,
+.triagePanel p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+.readinessNotice {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  margin-bottom: 12px;
+  padding: 11px 12px;
+  border: 1px solid var(--brand-soft);
+  border-radius: 8px;
+  background: #f7f9ff;
+}
+.readinessNotice strong {
+  flex: none;
+  color: var(--brand);
+  font-size: 12px;
+}
+.releaseTriageGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.triagePanel {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 13px;
+  background: #fff;
+}
+.triagePanel h4 {
+  margin: 0;
+}
+.triageItem {
+  display: grid;
+  grid-template-columns: 150px 170px minmax(0, 1fr);
+  gap: 8px;
+  align-items: center;
+  padding: 8px;
+  border-radius: 8px;
+  background: var(--warn-soft);
+  color: var(--warn);
+  font-size: 12px;
+}
+.triageItem.failed {
+  background: var(--bad-soft);
+  color: var(--bad);
+}
+.triageItem.skipped {
+  background: #f4f6f9;
+  color: #475467;
+}
+.triageItem small {
+  overflow-wrap: anywhere;
+}
 .releaseChecks {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
   margin-top: 14px;
+}
+.releaseDetails {
+  margin-top: 12px;
+  border-top: 1px solid var(--line);
+  padding-top: 10px;
+}
+.releaseDetails summary {
+  cursor: pointer;
+  color: var(--brand);
+  font-size: 13px;
+  font-weight: 800;
+}
+.releaseDetailList {
+  display: grid;
+  gap: 7px;
+  margin-top: 10px;
+}
+.releaseDetailItem {
+  display: grid;
+  grid-template-columns: 170px 82px minmax(0, 1fr);
+  gap: 8px;
+  align-items: center;
+  font-size: 12px;
+}
+.releaseDetailItem small {
+  color: var(--muted);
+  overflow-wrap: anywhere;
 }
 .releaseIssues {
   margin-top: 12px;
@@ -216,6 +335,6 @@ td { overflow-wrap: anywhere; }
   .nav { grid-template-columns: repeat(7, minmax(0, 1fr)); }
   .nav a { justify-content: center; font-size: 0; }
   .topbar, .sectionHeader, .logItem, .contractLayout { display: grid; }
-  .metrics, .appGrid, .workspaceGrid, .systemStatus, .contractCheckGrid, .connectionLogItem, .releaseGrid, .releaseChecks { grid-template-columns: 1fr; }
+  .metrics, .appGrid, .workspaceGrid, .systemStatus, .contractCheckGrid, .connectionLogItem, .releaseGrid, .releaseChecks, .releaseSummaryGrid, .releaseTriageGrid, .triageItem, .releaseDetailItem { grid-template-columns: 1fr; }
   .searchBox { min-width: 0; }
 }
