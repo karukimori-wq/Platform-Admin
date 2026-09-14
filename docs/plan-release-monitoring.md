@@ -63,6 +63,17 @@ The monitoring payload is normalized to `success`, `warning`, `error`, or `skipp
 - Auth and persistence readiness are visible.
 - Feedback Hub entrypoint is available for questions, bugs, and improvement requests.
 
+## Dashboard Triage
+
+The Plan Readiness dashboard summarizes release status before the per-app cards:
+
+- `Release ready`: apps where every readiness check is `success`.
+- `Review needed`: apps with at least one `warning` or `skipped` item.
+- `Blocked`: apps with at least one `error` item.
+- `Checks`: successful checks compared with all release readiness checks.
+
+Operators should use the `Blocked` panel first because those items stop a Free / Pro release. The `Review needed` panel is for migration gaps, missing optional endpoints, or apps that have not yet published a production URL. Per-app cards show the plan contract version, app version, release scope, and the detailed check list without exposing business data or customer content.
+
 ## App Response Normalization
 
 Apps may expose release readiness in either flat fields or nested objects. Platform Admin accepts operational status fields such as:
