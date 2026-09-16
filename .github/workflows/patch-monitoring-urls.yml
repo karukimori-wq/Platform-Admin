@@ -1,0 +1,68 @@
+name: Patch monitoring production URLs
+
+on:
+  push:
+    branches:
+      - fix/current-production-monitoring-urls
+    paths:
+      - .github/workflows/patch-monitoring-urls.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.event.head_commit.message != 'Remove monitoring URL patch helper'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/current-production-monitoring-urls
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Patch current Production monitoring URLs
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          replacements = {
+              '.env.example': [
+                  ('GROWTH_ENGINE_BASE_URL=https://growth-engine-ruby-nine.vercel.app', 'GROWTH_ENGINE_BASE_URL=https://growth-engine.karukimori.workers.dev'),
+                  ('NUMERIA_STUDIO_BASE_URL=https://numeria-studio.illusionddt.chatgpt.site', 'NUMERIA_STUDIO_BASE_URL=https://numeria-studio.com'),
+              ],
+              'lib/connection-test.ts': [
+                  ('baseUrl("NUMERIA_STUDIO_BASE_URL", "https://numeria-studio.illusionddt.chatgpt.site")', 'baseUrl("NUMERIA_STUDIO_BASE_URL", "https://numeria-studio.com")'),
+              ],
+              'lib/plan-readiness.ts': [
+                  ('baseUrl("NUMERIA_STUDIO_BASE_URL", "https://numeria-studio.illusionddt.chatgpt.site")', 'baseUrl("NUMERIA_STUDIO_BASE_URL", "https://numeria-studio.com")'),
+              ],
+          }
+
+          for filename, pairs in replacements.items():
+              path = Path(filename)
+              text = path.read_text()
+              for old, new in pairs:
+                  if old not in text:
+                      raise SystemExit(f'Expected monitoring URL anchor missing in {filename}: {old}')
+                  text = text.replace(old, new, 1)
+              path.write_text(text)
+
+          test = Path('scripts/verify-monitoring-urls.mjs')
+          test.write_text('''import fs from "node:fs";\n\nconst files = [".env.example", "lib/connection-test.ts", "lib/plan-readiness.ts"];\nconst combined = files.map((file) => fs.readFileSync(file, "utf8")).join("\\n");\n\nfor (const retired of [\n  "https://growth-engine-ruby-nine.vercel.app",\n  "https://numeria-studio.illusionddt.chatgpt.site"\n]) {\n  if (combined.includes(retired)) throw new Error(`Retired monitoring URL remains: ${retired}`);\n}\n\nconst env = fs.readFileSync(".env.example", "utf8");\nif (!env.includes("GROWTH_ENGINE_BASE_URL=https://growth-engine.karukimori.workers.dev")) throw new Error("Current Growth Engine Production URL missing");\nif (!env.includes("NUMERIA_STUDIO_BASE_URL=https://numeria-studio.com")) throw new Error("Current Numeria Studio Production URL missing");\n\nfor (const file of ["lib/connection-test.ts", "lib/plan-readiness.ts"]) {\n  const text = fs.readFileSync(file, "utf8");\n  if (!text.includes('baseUrl("NUMERIA_STUDIO_BASE_URL", "https://numeria-studio.com")')) throw new Error(`Current Numeria fallback missing in ${file}`);\n}\n\nconsole.log("Monitoring Production URL defaults verified");\n''')
+          PY
+      - name: Install dependencies
+        run: npm install
+      - name: Verify monitoring URL regression
+        run: node scripts/verify-monitoring-urls.mjs
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Build
+        run: npm run build
+      - name: Commit verified cleanup
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add .env.example lib/connection-test.ts lib/plan-readiness.ts scripts/verify-monitoring-urls.mjs
+          git commit -m "Align monitoring URLs with current Production"
+          git push origin HEAD:fix/current-production-monitoring-urls
