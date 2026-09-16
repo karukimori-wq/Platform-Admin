@@ -25,7 +25,7 @@ const planApps: PlanAppConfig[] = [
   {
     appName: "numeria-studio",
     appId: "numeria-studio",
-    baseUrl: baseUrl("NUMERIA_STUDIO_BASE_URL", "https://numeria-studio.illusionddt.chatgpt.site")
+    baseUrl: baseUrl("NUMERIA_STUDIO_BASE_URL", "https://numeria-studio.com")
   },
   {
     appName: "velvet",
