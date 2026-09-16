@@ -41,7 +41,7 @@ export const connectionTestApps: TestApp[] = [
     serviceBinding: "COMMUNICATION_PLANNER_SERVICE"
   },
   { appName: "sns-planner", baseUrl: baseUrl("SNS_PLANNER_BASE_URL", "https://sns-planner.illusionddt.chatgpt.site") },
-  { appName: "numeria-studio", baseUrl: baseUrl("NUMERIA_STUDIO_BASE_URL", "https://numeria-studio.illusionddt.chatgpt.site") },
+  { appName: "numeria-studio", baseUrl: baseUrl("NUMERIA_STUDIO_BASE_URL", "https://numeria-studio.com") },
   {
     appName: "velvet",
     baseUrl: optionalBaseUrl("VELVET_BASE_URL"),
